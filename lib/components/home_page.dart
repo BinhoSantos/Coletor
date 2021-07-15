@@ -17,13 +17,16 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
+      drawer: Drawer(
+        child: Column(),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 32),
             ButtonWidget(
-                text: 'Scan Barcode',
+                text: 'Escaneie o código de barras',
                 onClicked: () => Navigator.of(context).pushNamed('/scan')),
           ],
         ),

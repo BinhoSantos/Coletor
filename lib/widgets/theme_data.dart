@@ -7,12 +7,12 @@ class ThemeData2 extends StatelessWidget {
   const ThemeData2(
       {Key? key, required MyHomePage home, required BarcodeScanPage scan})
       : super(key: key);
-  static final String title = 'Barcode Scanner';
+  static final String title = 'Coletor - Testes';
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: 'É tempo de testes',
         theme: ThemeData(
-          primarySwatch: Colors.deepPurple,
+          primarySwatch: Colors.green,
         ),
         routes: <String, WidgetBuilder>{
           '/': (context) => LoginPage(),

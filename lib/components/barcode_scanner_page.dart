@@ -24,7 +24,7 @@ class _BarcodeScanPageState extends State<BarcodeScanPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                'Scan Result',
+                'Resultado do Scan',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.white54,
@@ -42,7 +42,7 @@ class _BarcodeScanPageState extends State<BarcodeScanPage> {
               ),
               SizedBox(height: 72),
               ButtonWidget(
-                text: 'Start Barcode scan',
+                text: 'Escanear',
                 onClicked: scanBarcode,
               ),
             ],

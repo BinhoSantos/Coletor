@@ -1,8 +1,11 @@
 import 'package:coletor_nativo/components/barcode_scanner_page.dart';
+import 'package:coletor_nativo/components/coletor_add_page.dart';
+import 'package:coletor_nativo/components/historico_page.dart';
 import 'package:coletor_nativo/components/home_page.dart';
 import 'package:coletor_nativo/components/login_screen.dart';
 import 'package:flutter/material.dart';
 
+//Classe responsável pelas rotas e pelo design do aplicativo
 class ThemeData2 extends StatelessWidget {
   const ThemeData2(
       {Key? key, required MyHomePage home, required BarcodeScanPage scan})
@@ -15,11 +18,13 @@ class ThemeData2 extends StatelessWidget {
           primarySwatch: Colors.green,
         ),
         routes: <String, WidgetBuilder>{
-          '/': (context) => LoginPage(),
+          '/1': (context) => LoginPage(),
           '/home': (context) => MyHomePage(title: title),
           '/scan': (context) => BarcodeScanPage(
                 title: title,
               ),
+          '/addcodbarra': (context) => Coletor_Add(),
+          '/': (context) => Historico(),
         },
       );
 }

@@ -1,10 +1,14 @@
+import 'package:coletor_nativo/components/coletor_add_page.dart';
 import 'package:coletor_nativo/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class BarcodeScanPage extends StatefulWidget {
-  const BarcodeScanPage({Key? key, required this.title}) : super(key: key);
+  const BarcodeScanPage({
+    Key? key,
+    required this.title,
+  }) : super(key: key);
 
   final String title;
   @override
@@ -54,7 +58,7 @@ class _BarcodeScanPageState extends State<BarcodeScanPage> {
     try {
       final barcode = await FlutterBarcodeScanner.scanBarcode(
         '#ff6666',
-        'Cancel',
+        'Cancelar',
         true,
         ScanMode.BARCODE,
       );

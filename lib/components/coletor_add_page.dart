@@ -16,6 +16,7 @@ class _Coletor_AddState extends State<Coletor_Add> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Tipagem Atual"),
+        centerTitle: true,
       ),
       body: ListView.builder(
         //List View é utilizada para poder usar o "Scroll",

@@ -12,6 +12,7 @@ class DatabaseHelper {
   String colId = "id";
   String colCodigo = "codigo";
   String colQuantidade = "quantidade";
+  String colNome = "nome";
 
   // static DatabaseHelper instance = DatabaseHelper();
   //Construtor nomeado para criar a instancia
@@ -39,7 +40,7 @@ class DatabaseHelper {
   //Cria o banco de dados na primeira passagem
   void _createDB(Database db, int newVersion) async {
     await db.execute(
-        "CREATE TABLE $colCodBarrasTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, '$colCodigo TEXT, $colQuantidade INTEGER)");
+        "CREATE TABLE $colCodBarrasTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colCodigo TEXT, $colQuantidade INTEGER, $colNome TEXT)"); //, $colNome TEXT
   }
 
   //Insere um código de barras dentro do banco de dados
@@ -56,7 +57,7 @@ class DatabaseHelper {
     Database db = await this.database;
 
     List<Map> maps = await db.query(colCodBarrasTable,
-        columns: [colId, colCodigo, colQuantidade],
+        columns: [colId, colCodigo, colQuantidade, colNome],
         where: "$colId = ?",
         whereArgs: [id]);
 
@@ -65,6 +66,19 @@ class DatabaseHelper {
     } else {
       return null;
     }
+  }
+
+  //Convertendo em lista para aparecer no Formulário
+  Future<List<codigo_barras>> getCodBarras() async {
+    Database db = await this.database;
+
+    var resultado = await db.query(colCodBarrasTable);
+
+    List<codigo_barras> lista = resultado.isNotEmpty
+        ? resultado.map((c) => codigo_barras.fromMap(c)).toList()
+        : [];
+
+    return lista;
   }
 
   //Altera o código de barras dentro do banco pelo ID
@@ -77,6 +91,14 @@ class DatabaseHelper {
     return resultado;
   }
 
+  //Altera o código de barras dentro do banco pelo Numero do Codigo
+  Future<int> updateCodBarrasPerCodigo(codigo_barras codBarras) async {
+    var db = await this.database;
+    var resultado = await db.update(colCodBarrasTable, codBarras.toMap(),
+        where: '$colCodigo = ?', whereArgs: [codBarras.codigo]);
+    return resultado;
+  }
+
   //Deleta o codigo de barras pelo ID
   Future<int> deleteCodBarras(int id) async {
     var db = await this.database;
@@ -85,5 +107,20 @@ class DatabaseHelper {
         .delete(colCodBarrasTable, where: '$colId = ?', whereArgs: [id]);
 
     return resultado;
+  }
+
+  //Soma a quantidade de código de barras via ID
+  Future<int> getCount() async {
+    Database db = await this.database;
+    List<Map<String, dynamic>> x =
+        await db.rawQuery("SELECT COUNT (*) FROM $colCodBarrasTable");
+    int? resultado = Sqflite.firstIntValue(x);
+    return resultado!;
+  }
+
+  //Fecha a conexão com o banco
+  Future close() async {
+    Database db = await this.database;
+    db.close();
   }
 }

@@ -16,7 +16,7 @@ class BarcodeScanPage extends StatefulWidget {
 }
 
 class _BarcodeScanPageState extends State<BarcodeScanPage> {
-  String barcode = 'Unknown';
+  String barcode = '';
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -31,7 +31,7 @@ class _BarcodeScanPageState extends State<BarcodeScanPage> {
                 'Resultado do Scan',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white54,
+                  color: Colors.black45,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -41,7 +41,7 @@ class _BarcodeScanPageState extends State<BarcodeScanPage> {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ),
               SizedBox(height: 72),

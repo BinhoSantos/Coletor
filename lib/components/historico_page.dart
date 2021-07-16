@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:coletor_nativo/controller/user_controller.dart';
 import 'package:coletor_nativo/helpers/database_helpers.dart';
 import 'package:flutter/material.dart';
@@ -15,25 +13,28 @@ class Historico extends StatefulWidget {
 
 class _HistoricoState extends State<Historico> {
   DatabaseHelper db = DatabaseHelper.instance;
-
+  //Faz uma lista com os códigos registrados no banco.
   List<codigo_barras> codbarra = <codigo_barras>[];
 
   var data = [];
   @override
   void initState() {
     super.initState();
-    //codigo_barras c = codigo_barras(2, '1235958456126', 2, "Queijo Parmesão");
-    //db.insertCodBarra(c);
+    codigo_barras c = codigo_barras(2, '1235958456126', 2, "Queijo Parmesão");
+    db.insertCodBarra(c);
+    /*   db.getCodBarras().then((lista) {
+      print(lista);
+    }); */
+    _exibeTodosCodBarra();
+  }
 
+  //Metódo para exibir os códigos de barra na list view
+  void _exibeTodosCodBarra() {
     db.getCodBarras().then((lista) {
       setState(() {
         codbarra = lista;
       });
     });
-
-    /*   db.getCodBarras().then((lista) {
-      print(lista);
-    }); */
   }
 
   Widget build(BuildContext context) {
@@ -59,6 +60,7 @@ class _HistoricoState extends State<Historico> {
     );
   }
 
+  //Widget que mostra a lista com os cards e permite que sejam tocados
   _listaCodBarras(BuildContext context, int index) {
     return GestureDetector(
         child: Card(
@@ -96,10 +98,18 @@ class _HistoricoState extends State<Historico> {
         });
   }
 
-  void _exibeCodBarra({required codigo_barras codbarra}) {
-    Navigator.push(
+  Future<void> _exibeCodBarra({required codigo_barras codbarra}) async {
+    final CodBarraAlterado = await Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => CadastroEdita(codbarra: codbarra)));
+    if (CodBarraAlterado != null) {
+      if (codbarra != null) {
+        await db.updateCodBarras(CodBarraAlterado);
+      } else {
+        await db.insertCodBarra(CodBarraAlterado);
+      }
+      _exibeTodosCodBarra();
+    }
   }
 }

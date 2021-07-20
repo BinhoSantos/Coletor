@@ -1,4 +1,5 @@
 import 'package:coletor_nativo/widgets/button_widget.dart';
+import 'package:coletor_nativo/widgets/main_drawer.dart';
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -17,9 +18,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      drawer: Drawer(
-        child: Column(),
-      ),
+      drawer: mainDrawer(),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

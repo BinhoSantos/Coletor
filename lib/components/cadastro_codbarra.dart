@@ -1,53 +1,78 @@
+import 'dart:convert';
+
 import 'package:coletor_nativo/controller/user_controller.dart';
+import 'package:coletor_nativo/helpers/database_helpers.dart';
 import 'package:flutter/material.dart';
 
-//Cria as variavéis para o teste da edição
-class CadastroEdita extends StatefulWidget {
-  final codigo_barras? codbarra;
-  CadastroEdita({this.codbarra});
+import 'edita_codbarra_page.dart';
+
+class CadastroCodigoBarra extends StatefulWidget {
+  const CadastroCodigoBarra({Key? key}) : super(key: key);
 
   @override
-  _CadastroEditaState createState() => _CadastroEditaState();
+  _CadastroCodigoBarraState createState() => _CadastroCodigoBarraState();
 }
 
-class _CadastroEditaState extends State<CadastroEdita> {
+class _CadastroCodigoBarraState extends State<CadastroCodigoBarra> {
+  get codbarra => codigo_barras(id, codigo, quantidade, nome);
+
+  final _nomeFocus = FocusNode();
+  late int id, index, quantidade;
+  late String nome, codigo;
+  DatabaseHelper db = DatabaseHelper.instance;
+
   final _editaNomeProduto = TextEditingController();
   final _editaCodigoProduto = TextEditingController();
   final _editaQuantidadeProduto = TextEditingController();
-  final _nomeFocus = FocusNode();
 
-  late String title;
-  bool editando = false;
-
+  // ignore: unused_field
   late codigo_barras _editaCodBarra;
 
-  //Persistência para ver se o código é nulo ou já existente para habilitar a edição.
+  //List<codigo_barras> codbarra = <codigo_barras>[];
+
   @override
   void initState() {
     super.initState();
-    if (widget.codbarra == null) {
-      _editaCodBarra = codigo_barras(null, "", 0, "");
-    } else {
-      _editaCodBarra = codigo_barras.fromMap(widget.codbarra!.toMap());
-      _editaNomeProduto.text = _editaCodBarra.nome!;
-      _editaCodigoProduto.text = _editaCodBarra.codigo!;
-      _editaQuantidadeProduto.text = _editaCodBarra.quantidade.toString();
-    }
+
+    _pegaUltimoId();
+  }
+
+  void _pegaUltimoId() {
+    db.selectDados().then((lista) {
+      setState(() {});
+      //id = _editaCodBarra.id + 1;
+      print(id);
+
+      /* _editaCodBarra = codigo_barras.fromMap(lista);
+      print(_editaCodBarra);
+      id = lista[1].id;
+      print(" Parte 1" + id.toString());*/
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_editaCodBarra.nome == ""
-            ? "Cadastro de Produto"
-            : "Editar Produto"),
+        title: Text("Cadastro de Produto"),
         centerTitle: true,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (_editaCodBarra.nome != null && _editaCodBarra.nome!.isNotEmpty) {
-            Navigator.pop(context, _editaCodBarra);
+          if (nome == "" || nome.length <= 1) {
+            _exibeAviso();
+          } else {
+            nome = codbarra.nome;
+            quantidade = codbarra.quantidade;
+            codigo = codbarra.codigo;
+            db.insertCodBarra(codbarra);
+            Navigator.of(context).pushNamed('/h');
+          }
+        },
+        child: Icon(Icons.save),
+        /*onPressed: () {
+          if (_editaNomeProduto != null && _editaNomeProduto.text) {
+           // Navigator.pop(context, _editaNomeProduto);
             /*Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -60,6 +85,7 @@ class _CadastroEditaState extends State<CadastroEdita> {
           }
         },
         child: Icon(Icons.save),
+      */
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(8.0),
@@ -67,25 +93,27 @@ class _CadastroEditaState extends State<CadastroEdita> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextField(
-              controller: _editaNomeProduto,
               focusNode: _nomeFocus,
               decoration: InputDecoration(labelText: "Nome"),
               enabled: true,
               onChanged: (text) {
-                editando = true;
-                _editaCodBarra.nome = text;
+                nome = text;
               },
             ),
             TextField(
-              controller: _editaCodigoProduto,
-              decoration: InputDecoration(labelText: "Código"),
-              enabled: false,
-            ),
+                //controller: _editaCodigoProduto,
+                decoration: InputDecoration(labelText: "Código"),
+                enabled: true,
+                onChanged: (text) {
+                  codigo = text;
+                }),
             TextField(
-              controller: _editaQuantidadeProduto,
-              decoration: InputDecoration(labelText: "Quantidade"),
-              enabled: false,
-            ),
+                decoration:
+                    InputDecoration(labelText: "Quantidade", hintText: "1"),
+                enabled: true,
+                onChanged: (text) {
+                  quantidade = 1;
+                }),
           ],
         ),
       ),

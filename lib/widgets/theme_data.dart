@@ -1,4 +1,5 @@
 import 'package:coletor_nativo/components/barcode_scanner_page.dart';
+import 'package:coletor_nativo/components/cadastro_codbarra.dart';
 import 'package:coletor_nativo/components/coletor_add_page.dart';
 import 'package:coletor_nativo/components/historico_page.dart';
 import 'package:coletor_nativo/components/home_page.dart';
@@ -18,13 +19,14 @@ class ThemeData2 extends StatelessWidget {
           primarySwatch: Colors.green,
         ),
         routes: <String, WidgetBuilder>{
-          '/1': (context) => LoginPage(),
-          '/home': (context) => MyHomePage(title: title),
+          '/t': (context) => LoginPage(),
+          '/': (context) => MyHomePage(title: title),
           '/scan': (context) => BarcodeScanPage(
                 title: title,
               ),
           '/addcodbarra': (context) => Coletor_Add(),
-          '/': (context) => Historico(),
+          '/historico': (context) => Historico(),
+          "/cad": (context) => CadastroCodigoBarra(),
         },
       );
 }

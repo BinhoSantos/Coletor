@@ -1,4 +1,5 @@
-import 'package:coletor_nativo/components/coletor_add_page.dart';
+import 'package:coletor_nativo/controller/user_controller.dart';
+import 'package:coletor_nativo/helpers/database_helpers.dart';
 import 'package:coletor_nativo/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,15 +9,25 @@ class BarcodeScanPage extends StatefulWidget {
   const BarcodeScanPage({
     Key? key,
     required this.title,
+    this.codbarra,
   }) : super(key: key);
-
+  final codigo_barras? codbarra;
   final String title;
   @override
   _BarcodeScanPageState createState() => _BarcodeScanPageState();
 }
 
 class _BarcodeScanPageState extends State<BarcodeScanPage> {
+  DatabaseHelper db = DatabaseHelper.instance;
   String barcode = '';
+  late codigo_barras _editaCodBarra;
+  @override
+  void initState() {
+    super.initState();
+    if (widget.codbarra == null) {
+      _editaCodBarra = codigo_barras(null, "", 1, "");
+    }
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -57,7 +68,7 @@ class _BarcodeScanPageState extends State<BarcodeScanPage> {
   Future<void> scanBarcode() async {
     try {
       final barcode = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666',
+        '#010101',
         'Cancelar',
         true,
         ScanMode.BARCODE,
@@ -67,9 +78,14 @@ class _BarcodeScanPageState extends State<BarcodeScanPage> {
 
       setState(() {
         this.barcode = barcode;
+        if (barcode != "" && barcode != "-1") {
+          _editaCodBarra = codigo_barras(null, barcode, 1, "");
+          db.insertCodBarra(_editaCodBarra);
+          Navigator.of(context).pushNamed('/historico');
+        }
       });
     } on PlatformException {
-      barcode = 'Failed to get platform version.';
+      barcode = 'Isso não era pra acontecer, tenta de novo';
     }
   }
 }

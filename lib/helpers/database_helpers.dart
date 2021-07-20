@@ -47,7 +47,8 @@ class DatabaseHelper {
   Future<int> insertCodBarra(codigo_barras codigoBarras) async {
     Database db = await this.database;
 
-    var resultado = db.insert(colCodBarrasTable, codigoBarras.toMap());
+    var resultado = db.insert(colCodBarrasTable, codigoBarras.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
 
     return resultado;
   }
@@ -122,5 +123,25 @@ class DatabaseHelper {
   Future close() async {
     Database db = await this.database;
     db.close();
+  }
+
+  Future selectDados() async {
+    Database db = await this.database;
+    List<Map> lista = await db.rawQuery('SELECT * FROM $colCodBarrasTable');
+    if (lista.length > 0) {
+      return codigo_barras.fromMap(lista.last);
+    } else {
+      return null;
+    }
+  }
+
+  //Altera o código de barras dentro do banco pelo ID
+  Future<int> updateQtdCodBarras(codigo_barras codBarras) async {
+    var db = await this.database;
+
+    var resultado = await db.update(colCodBarrasTable, codBarras.toMap(),
+        where: '$colCodigo = ?', whereArgs: [codBarras.codigo]);
+
+    return resultado;
   }
 }

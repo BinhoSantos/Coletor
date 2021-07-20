@@ -1,9 +1,9 @@
 class codigo_barras {
   //lembrar de consertar isso aqui depois
-  late int id;
-  late String codigo;
-  late int quantidade;
-  late String nome;
+  int? id;
+  String? codigo;
+  int? quantidade;
+  String? nome;
 
   codigo_barras(this.id, this.codigo, this.quantidade, this.nome);
 
@@ -32,5 +32,3 @@ class codigo_barras {
     return "codigo_barras => (id: $id, codigo: $codigo, quantidade: $quantidade, nome: $nome)";
   }
 }
-
-// ignore: non_constant_identifier_names

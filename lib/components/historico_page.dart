@@ -1,7 +1,6 @@
 import 'package:coletor_nativo/controller/user_controller.dart';
 import 'package:coletor_nativo/helpers/database_helpers.dart';
 import 'package:flutter/material.dart';
-
 import 'edita_codbarra_page.dart';
 
 class Historico extends StatefulWidget {
@@ -20,9 +19,9 @@ class _HistoricoState extends State<Historico> {
   @override
   void initState() {
     super.initState();
-    codigo_barras c = codigo_barras(2, '1235958456126', 2, "Queijo Parmesão");
+    /*codigo_barras c = codigo_barras(1, '1235958456126', 1, "Queijo Parmesão");
     db.insertCodBarra(c);
-    /*   db.getCodBarras().then((lista) {
+       db.getCodBarras().then((lista) {
       print(lista);
     }); */
     _exibeTodosCodBarra();
@@ -47,6 +46,7 @@ class _HistoricoState extends State<Historico> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).pushNamed('/scan');
+          //_exibeCodBarra();
         },
         child: Icon(Icons.add),
       ),
@@ -67,6 +67,7 @@ class _HistoricoState extends State<Historico> {
           child: Padding(
             padding: EdgeInsets.all(8),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.all(8),
@@ -74,11 +75,11 @@ class _HistoricoState extends State<Historico> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        "Produto: " + codbarra[index].nome ?? "",
+                        "Produto: " + codbarra[index].nome! ?? "",
                         style: TextStyle(fontSize: 16),
                       ),
                       Text(
-                        "Código: " + codbarra[index].codigo ?? "",
+                        "Código: " + codbarra[index].codigo! ?? "",
                         style: TextStyle(fontSize: 14),
                       ),
                       Text(
@@ -89,6 +90,12 @@ class _HistoricoState extends State<Historico> {
                     ],
                   ),
                 ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    _confirmaExclusao(context, codbarra[index].id!, index);
+                  },
+                ),
               ],
             ),
           ),
@@ -98,12 +105,14 @@ class _HistoricoState extends State<Historico> {
         });
   }
 
-  Future<void> _exibeCodBarra({required codigo_barras codbarra}) async {
+  Future<void> _exibeCodBarra({codbarra}) async {
+    // ignore: non_constant_identifier_names
     final CodBarraAlterado = await Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => CadastroEdita(codbarra: codbarra)));
     if (CodBarraAlterado != null) {
+      // ignore: unnecessary_null_comparison
       if (codbarra != null) {
         await db.updateCodBarras(CodBarraAlterado);
       } else {
@@ -111,5 +120,33 @@ class _HistoricoState extends State<Historico> {
       }
       _exibeTodosCodBarra();
     }
+  }
+
+  void _confirmaExclusao(BuildContext context, int idCodBarra, index) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Excluir Produto"),
+            content: Text("Confirme a exclusão do produto"),
+            actions: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("Cancelar"),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      codbarra.removeAt(index);
+                      db.deleteCodBarras(idCodBarra);
+                      Navigator.of(context).pop();
+                    });
+                  },
+                  child: Text("Excluir")),
+            ],
+          );
+        });
   }
 }

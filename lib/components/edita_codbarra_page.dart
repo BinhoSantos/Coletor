@@ -11,12 +11,12 @@ class CadastroEdita extends StatefulWidget {
 }
 
 class _CadastroEditaState extends State<CadastroEdita> {
-  final _editaNomeProduto = TextEditingController();
   final _editaCodigoProduto = TextEditingController();
   final _editaQuantidadeProduto = TextEditingController();
   final _nomeFocus = FocusNode();
 
   late String title;
+  late int Conversor;
   bool editando = false;
 
   late codigo_barras _editaCodBarra;
@@ -26,10 +26,9 @@ class _CadastroEditaState extends State<CadastroEdita> {
   void initState() {
     super.initState();
     if (widget.codbarra == null) {
-      _editaCodBarra = codigo_barras(null, "", 0, "");
+      _editaCodBarra = codigo_barras(null, "", 0);
     } else {
       _editaCodBarra = codigo_barras.fromMap(widget.codbarra!.toMap());
-      _editaNomeProduto.text = _editaCodBarra.nome!;
       _editaCodigoProduto.text = _editaCodBarra.codigo!;
       _editaQuantidadeProduto.text = _editaCodBarra.quantidade.toString();
     }
@@ -39,14 +38,17 @@ class _CadastroEditaState extends State<CadastroEdita> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_editaCodBarra.nome == ""
+        title: Text(_editaCodBarra.quantidade == 0
             ? "Cadastro de Produto"
             : "Editar Produto"),
         centerTitle: true,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (_editaCodBarra.nome != null && _editaCodBarra.nome!.isNotEmpty) {
+          Conversor = int.parse(_editaQuantidadeProduto.text);
+          if (Conversor != null && Conversor > 0) {
+            //Conversor = int.parse(_editaQuantidadeProduto.text);
+            _editaCodBarra.quantidade = Conversor;
             Navigator.pop(context, _editaCodBarra);
             /*Navigator.push(
                 context,
@@ -67,24 +69,15 @@ class _CadastroEditaState extends State<CadastroEdita> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextField(
-              controller: _editaNomeProduto,
-              focusNode: _nomeFocus,
-              decoration: InputDecoration(labelText: "Nome"),
-              enabled: true,
-              onChanged: (text) {
-                editando = true;
-                _editaCodBarra.nome = text;
-              },
-            ),
-            TextField(
               controller: _editaCodigoProduto,
               decoration: InputDecoration(labelText: "Código"),
               enabled: false,
             ),
             TextField(
+              keyboardType: TextInputType.number,
               controller: _editaQuantidadeProduto,
               decoration: InputDecoration(labelText: "Quantidade"),
-              enabled: false,
+              enabled: true,
             ),
           ],
         ),

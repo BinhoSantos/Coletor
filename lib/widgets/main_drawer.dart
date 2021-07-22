@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+// ignore: unused_import
+import 'package:coletor_nativo/components/home_page.dart';
 
 class mainDrawer extends StatelessWidget {
   const mainDrawer({Key? key}) : super(key: key);

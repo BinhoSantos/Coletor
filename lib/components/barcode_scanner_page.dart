@@ -25,7 +25,7 @@ class _BarcodeScanPageState extends State<BarcodeScanPage> {
   void initState() {
     super.initState();
     if (widget.codbarra == null) {
-      _editaCodBarra = codigo_barras(null, "", 1, "");
+      _editaCodBarra = codigo_barras(null, "", 1);
     }
   }
 
@@ -79,13 +79,13 @@ class _BarcodeScanPageState extends State<BarcodeScanPage> {
       setState(() {
         this.barcode = barcode;
         if (barcode != "" && barcode != "-1") {
-          _editaCodBarra = codigo_barras(null, barcode, 1, "");
+          _editaCodBarra = codigo_barras(null, barcode, 1);
           db.insertCodBarra(_editaCodBarra);
           Navigator.of(context).pushNamed('/historico');
         }
       });
     } on PlatformException {
-      barcode = 'Isso não era pra acontecer, tenta de novo';
+      barcode = 'Um erro ocorreu, tente novamente';
     }
   }
 }

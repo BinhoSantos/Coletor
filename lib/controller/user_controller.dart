@@ -3,9 +3,8 @@ class codigo_barras {
   int? id;
   String? codigo;
   int? quantidade;
-  String? nome;
 
-  codigo_barras(this.id, this.codigo, this.quantidade, this.nome);
+  codigo_barras(this.id, this.codigo, this.quantidade);
 
   //ToMap codifica as informações para Map
   Map<String, dynamic> toMap() {
@@ -13,7 +12,6 @@ class codigo_barras {
       'id': id,
       'codigo': codigo,
       'quantidade': quantidade,
-      'nome': nome
     };
     return map;
   }
@@ -23,12 +21,12 @@ class codigo_barras {
     id = map['id'];
     codigo = map['codigo'];
     quantidade = map['quantidade'];
-    nome = map['nome'];
   }
 
   @override
   String toString() {
     // Retorna os valores como String
-    return "codigo_barras => (id: $id, codigo: $codigo, quantidade: $quantidade, nome: $nome)";
+    //return "codigo_barras => (id: $id, codigo: $codigo, quantidade: $quantidade)";
+    return "($quantidade $codigo)";
   }
 }

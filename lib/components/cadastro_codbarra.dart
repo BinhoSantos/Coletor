@@ -14,7 +14,7 @@ class CadastroCodigoBarra extends StatefulWidget {
 }
 
 class _CadastroCodigoBarraState extends State<CadastroCodigoBarra> {
-  get codbarra => codigo_barras(id, codigo, quantidade, nome);
+  get codbarra => codigo_barras(id, codigo, quantidade);
 
   final _nomeFocus = FocusNode();
   late int id, index, quantidade;
@@ -93,14 +93,6 @@ class _CadastroCodigoBarraState extends State<CadastroCodigoBarra> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextField(
-              focusNode: _nomeFocus,
-              decoration: InputDecoration(labelText: "Nome"),
-              enabled: true,
-              onChanged: (text) {
-                nome = text;
-              },
-            ),
-            TextField(
                 //controller: _editaCodigoProduto,
                 decoration: InputDecoration(labelText: "Código"),
                 enabled: true,
@@ -126,8 +118,8 @@ class _CadastroCodigoBarraState extends State<CadastroCodigoBarra> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Nome"),
-            content: new Text("Informe um nome válido para o produto"),
+            title: Text("Quantidade"),
+            content: new Text("A quantidade não pode ser 0"),
             actions: <Widget>[
               new TextButton(
                   onPressed: () {

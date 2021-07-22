@@ -11,10 +11,10 @@ class ThemeData2 extends StatelessWidget {
   const ThemeData2(
       {Key? key, required MyHomePage home, required BarcodeScanPage scan})
       : super(key: key);
-  static final String title = 'Coletor - Testes';
+  static final String title = 'Coletor';
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'É tempo de testes',
+        title: 'Coletor',
         theme: ThemeData(
           primarySwatch: Colors.green,
         ),

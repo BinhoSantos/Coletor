@@ -1,11 +1,16 @@
+import 'dart:io';
+
 import 'package:coletor_nativo/controller/user_controller.dart';
 import 'package:coletor_nativo/helpers/database_helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:path_provider/path_provider.dart';
 import 'edita_codbarra_page.dart';
 
 class Historico extends StatefulWidget {
-  const Historico({Key? key}) : super(key: key);
-
+  const Historico({Key? key, this.codbarra}) : super(key: key);
+  final codigo_barras? codbarra;
   @override
   _HistoricoState createState() => _HistoricoState();
 }
@@ -14,16 +19,20 @@ class _HistoricoState extends State<Historico> {
   DatabaseHelper db = DatabaseHelper.instance;
   //Faz uma lista com os códigos registrados no banco.
   List<codigo_barras> codbarra = <codigo_barras>[];
-
-  var data = [];
+  String barcode = '';
+  String listaBarra = '';
+  late codigo_barras _editaCodBarra;
   @override
   void initState() {
     super.initState();
-    /*codigo_barras c = codigo_barras(1, '1235958456126', 1, "Queijo Parmesão");
+    if (widget.codbarra == null) {
+      _editaCodBarra = codigo_barras(null, "", 1);
+    }
+    codigo_barras c = codigo_barras(2, '1235958456156', 1);
     db.insertCodBarra(c);
-       db.getCodBarras().then((lista) {
+    /*db.getCodBarras().then((lista) {
       print(lista);
-    }); */
+    });*/
     _exibeTodosCodBarra();
   }
 
@@ -41,11 +50,18 @@ class _HistoricoState extends State<Historico> {
       appBar: AppBar(
         title: Text("Histórico"),
         centerTitle: true,
-        actions: <Widget>[],
+        actions: <Widget>[
+          IconButton(
+              onPressed: () {
+                decodeCodBarra();
+              },
+              icon: Icon(Icons.upload)),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).pushNamed('/scan');
+          scanBarcode();
+          //Navigator.of(context).pushNamed('/scan');
           //_exibeCodBarra();
         },
         child: Icon(Icons.add),
@@ -75,11 +91,7 @@ class _HistoricoState extends State<Historico> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        "Produto: " + codbarra[index].nome! ?? "",
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      Text(
-                        "Código: " + codbarra[index].codigo! ?? "",
+                        "Código: " + codbarra[index].codigo!,
                         style: TextStyle(fontSize: 14),
                       ),
                       Text(
@@ -112,7 +124,6 @@ class _HistoricoState extends State<Historico> {
         MaterialPageRoute(
             builder: (context) => CadastroEdita(codbarra: codbarra)));
     if (CodBarraAlterado != null) {
-      // ignore: unnecessary_null_comparison
       if (codbarra != null) {
         await db.updateCodBarras(CodBarraAlterado);
       } else {
@@ -148,5 +159,54 @@ class _HistoricoState extends State<Historico> {
             ],
           );
         });
+  }
+
+  Future<void> scanBarcode() async {
+    try {
+      final barcode = await FlutterBarcodeScanner.scanBarcode(
+        '#010101',
+        'Cancelar',
+        true,
+        ScanMode.BARCODE,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        this.barcode = barcode;
+        if (barcode != "" && barcode != "-1") {
+          _editaCodBarra = codigo_barras(null, barcode, 1);
+          db.insertCodBarra(_editaCodBarra);
+          Navigator.of(context).pop();
+          //Navigator.of(context).pushNamed('/historico');
+        }
+      });
+    } on PlatformException {
+      barcode = 'Um erro ocorreu, tente novamente';
+    }
+  }
+
+  //Inicialmente a quebra da lista para se tornar String
+  void decodeCodBarra() {
+    var now = DateTime.now().toString();
+    print(now);
+    listaBarra = codbarra.join(',');
+    print(listaBarra);
+  }
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    var now = DateTime.now().toString();
+    final path = await _localPath;
+    return File('$path/Coleta$now.txt');
+  }
+
+  Future<File> writeListaCodBarra(int counter) async {
+    final file = await _localFile;
+    return file.writeAsString(listaBarra);
   }
 }

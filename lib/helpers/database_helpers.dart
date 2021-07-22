@@ -12,7 +12,6 @@ class DatabaseHelper {
   String colId = "id";
   String colCodigo = "codigo";
   String colQuantidade = "quantidade";
-  String colNome = "nome";
 
   // static DatabaseHelper instance = DatabaseHelper();
   //Construtor nomeado para criar a instancia
@@ -40,7 +39,7 @@ class DatabaseHelper {
   //Cria o banco de dados na primeira passagem
   void _createDB(Database db, int newVersion) async {
     await db.execute(
-        "CREATE TABLE $colCodBarrasTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colCodigo TEXT, $colQuantidade INTEGER, $colNome TEXT)"); //, $colNome TEXT
+        "CREATE TABLE $colCodBarrasTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colCodigo TEXT, $colQuantidade INTEGER)"); //, $colNome TEXT
   }
 
   //Insere um código de barras dentro do banco de dados
@@ -58,7 +57,7 @@ class DatabaseHelper {
     Database db = await this.database;
 
     List<Map> maps = await db.query(colCodBarrasTable,
-        columns: [colId, colCodigo, colQuantidade, colNome],
+        columns: [colId, colCodigo, colQuantidade],
         where: "$colId = ?",
         whereArgs: [id]);
 

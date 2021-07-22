@@ -6,7 +6,7 @@ import 'home_page.dart';
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
-  static final String title = 'Testando';
+  static final String title = 'Coletor';
   @override
   Widget build(BuildContext context) {
     return ThemeData2(

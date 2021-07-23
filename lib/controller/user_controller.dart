@@ -25,8 +25,20 @@ class codigo_barras {
 
   @override
   String toString() {
+    String teste = "\n";
+    String Space = "         ";
+    String resultado = ('{' +
+        teste +
+        Space +
+        'quantidade:"$quantidade"' +
+        teste +
+        Space +
+        'codigo:"$codigo"' +
+        teste +
+        '}');
     // Retorna os valores como String
     //return "codigo_barras => (id: $id, codigo: $codigo, quantidade: $quantidade)";
-    return "($quantidade $codigo)";
+    return resultado;
+    //('quantidade:"$quantidade" codigo"$codigo"');
   }
 }

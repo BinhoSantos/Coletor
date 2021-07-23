@@ -38,16 +38,10 @@ class _CadastroCodigoBarraState extends State<CadastroCodigoBarra> {
   }
 
   void _pegaUltimoId() {
-    db.selectDados().then((lista) {
-      setState(() {});
-      //id = _editaCodBarra.id + 1;
-      print(id);
-
-      /* _editaCodBarra = codigo_barras.fromMap(lista);
+    /* _editaCodBarra = codigo_barras.fromMap(lista);
       print(_editaCodBarra);
       id = lista[1].id;
       print(" Parte 1" + id.toString());*/
-    });
   }
 
   @override

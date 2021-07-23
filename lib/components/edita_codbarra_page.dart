@@ -47,7 +47,6 @@ class _CadastroEditaState extends State<CadastroEdita> {
         onPressed: () {
           Conversor = int.parse(_editaQuantidadeProduto.text);
           if (Conversor != null && Conversor > 0) {
-            //Conversor = int.parse(_editaQuantidadeProduto.text);
             _editaCodBarra.quantidade = Conversor;
             Navigator.pop(context, _editaCodBarra);
             /*Navigator.push(

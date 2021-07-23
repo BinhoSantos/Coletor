@@ -99,6 +99,13 @@ class DatabaseHelper {
     return resultado;
   }
 
+  Future<int> updateCodBarrasPerCod(codigo_barras codBarras) async {
+    var db = await this.database;
+    var resultado = await db.update(colCodBarrasTable, codBarras.toMap(),
+        where: '$colCodigo = ?', whereArgs: [codBarras.codigo]);
+    return resultado;
+  }
+
   //Deleta o codigo de barras pelo ID
   Future<int> deleteCodBarras(int id) async {
     var db = await this.database;
@@ -106,6 +113,23 @@ class DatabaseHelper {
     var resultado = await db
         .delete(colCodBarrasTable, where: '$colId = ?', whereArgs: [id]);
 
+    return resultado;
+  }
+
+  //Deleta o codigo de barras pelo Codigo
+  Future<int> deleteCodBarrasStr(int codigo) async {
+    var db = await this.database;
+
+    var resultado = await db.delete(colCodBarrasTable,
+        where: '$colCodigo = ?', whereArgs: [codigo]);
+
+    return resultado;
+  }
+
+  //Deleta todos os códigos registrados até o momento
+  Future<int> deleteCodBarrasAll() async {
+    var db = await this.database;
+    var resultado = await db.delete(colCodBarrasTable);
     return resultado;
   }
 
@@ -124,17 +148,7 @@ class DatabaseHelper {
     db.close();
   }
 
-  Future selectDados() async {
-    Database db = await this.database;
-    List<Map> lista = await db.rawQuery('SELECT * FROM $colCodBarrasTable');
-    if (lista.length > 0) {
-      return codigo_barras.fromMap(lista.last);
-    } else {
-      return null;
-    }
-  }
-
-  //Altera o código de barras dentro do banco pelo ID
+  //Altera o código de barras dentro do banco pelo CODIGO
   Future<int> updateQtdCodBarras(codigo_barras codBarras) async {
     var db = await this.database;
 
@@ -142,5 +156,32 @@ class DatabaseHelper {
         where: '$colCodigo = ?', whereArgs: [codBarras.codigo]);
 
     return resultado;
+  }
+
+  //Convertendo em lista para aparecer no Formulário
+  Future<List<codigo_barras>> getCodBarrasGroup() async {
+    Database db = await this.database;
+
+    var resultado = await db.query(colCodBarrasTable, groupBy: colCodigo);
+
+    List<codigo_barras> lista = resultado.isNotEmpty
+        ? resultado.map((c) => codigo_barras.fromMap(c)).toList()
+        : [];
+
+    return lista;
+  }
+
+  //Lista que puxa os valores contados
+  Future<List<codigo_barras>> getCodBarrasCount() async {
+    Database db = await this.database;
+
+    var resultado = await db.rawQuery(
+        'SELECT $colCodigo, SUM($colQuantidade) AS quantidade FROM $colCodBarrasTable GROUP BY $colCodigo');
+
+    List<codigo_barras> lista = resultado.isNotEmpty
+        ? resultado.map((c) => codigo_barras.fromMap(c)).toList()
+        : [];
+
+    return lista;
   }
 }

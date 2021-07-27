@@ -91,7 +91,7 @@ class _CadastroEditaState extends State<CadastroEdita> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text("Nome"),
-            content: new Text("Informe um nome válido para o produto"),
+            content: new Text("Informe uma quantidade válida para o produto"),
             actions: <Widget>[
               new TextButton(
                   onPressed: () {

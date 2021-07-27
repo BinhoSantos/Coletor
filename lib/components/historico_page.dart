@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:coletor_nativo/components/configuracao.dart';
 import 'package:coletor_nativo/controller/user_controller.dart';
 import 'package:coletor_nativo/helpers/database_helpers.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'edita_codbarra_page.dart';
 
 class Historico extends StatefulWidget {
@@ -23,30 +25,50 @@ class _HistoricoState extends State<Historico> {
   String barcode = '';
   String listaBarra = '';
   String diretorio = '';
+  bool? qtdAgrupada;
+  int trava = 1;
   late codigo_barras _editaCodBarra;
+
   @override
   void initState() {
     super.initState();
+
+    SharedPrefs();
+
     if (widget.codbarra == null) {
       _editaCodBarra = codigo_barras(null, "", 1);
     }
-    //codigo_barras c = codigo_barras(2, '1235958456156', 1);
-    //db.insertCodBarra(c);
+    codigo_barras c = codigo_barras(1, '1235958456156', 1);
+    db.insertCodBarra(c);
+
+    codigo_barras c1 = codigo_barras(2, '1235958456156', 1);
+    db.insertCodBarra(c1);
+
     /*db.getCodBarras().then((lista) {
       print(lista);
     });*/
-    _exibeTodosCodBarra();
+    //_exibeTodosCodBarra();
   }
 
   //Metódo para exibir os códigos de barra na list view
   void _exibeTodosCodBarra() {
-    db.getCodBarrasCount().then((lista) {
-      setState(() {
-        codbarra = lista;
+    print(qtdAgrupada);
+    if (qtdAgrupada == true) {
+      db.getCodBarrasCount().then((lista) {
+        setState(() {
+          codbarra = lista;
+        });
       });
-    });
+    } else {
+      db.getCodBarras().then((lista) {
+        setState(() {
+          codbarra = lista;
+        });
+      });
+    }
   }
 
+  //Widget principal do projeto
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -59,6 +81,13 @@ class _HistoricoState extends State<Historico> {
                 _confirmaFechamento(context);
               },
               icon: Icon(Icons.upload)),
+          IconButton(
+              onPressed: () {
+                _alteracaoConfiguracao();
+                //decodeCodBarra();
+                //Navigator.of(context).pushNamed('/configuracao');
+              },
+              icon: Icon(Icons.settings)),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -130,8 +159,11 @@ class _HistoricoState extends State<Historico> {
             builder: (context) => CadastroEdita(codbarra: codbarra)));
     if (CodBarraAlterado != null) {
       if (codbarra != null) {
-        //await db.updateCodBarras(CodBarraAlterado);
-        await db.updateCodBarrasPerCodigo(CodBarraAlterado);
+        //Altera a quantidade com o Select normal
+        await db.updateCodBarras(CodBarraAlterado);
+        //Tenta alterar a quantidade com o Select ORDER BY
+        //await db.updateCodBarrasPerCodigo(CodBarraAlterado);
+        print(codbarra);
       } else {
         await db.insertCodBarra(CodBarraAlterado);
       }
@@ -139,6 +171,21 @@ class _HistoricoState extends State<Historico> {
     }
   }
 
+  Future<void> _alteracaoConfiguracao() async {
+    final configuracaoAlterada = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => Configuracao(
+                  modelador: trava,
+                )));
+    if (configuracaoAlterada != null) {
+      SharedPrefs();
+    } else {
+      SharedPrefs();
+    }
+  }
+
+  //Void que exclui o código de barras do banco
   void _confirmaExclusao(BuildContext context, int idCodBarra, index) {
     showDialog(
         context: context,
@@ -168,6 +215,7 @@ class _HistoricoState extends State<Historico> {
         });
   }
 
+  //Void que mostra o alertbox que leva o arquivo .txt
   void _confirmaFechamento(BuildContext context) {
     showDialog(
         context: context,
@@ -235,8 +283,6 @@ class _HistoricoState extends State<Historico> {
           _editaCodBarra = codigo_barras(null, barcode, 1);
           db.insertCodBarra(_editaCodBarra);
           _exibeTodosCodBarra();
-          //Navigator.of(context).pop();
-          //Navigator.of(context).pushNamed('/historico');
         }
       });
     } on PlatformException {
@@ -312,6 +358,7 @@ class _HistoricoState extends State<Historico> {
     return false;
   }
 
+  //Metódo para verificar as permissões
   Future<bool> _requestPermission(Permission permission) async {
     if (await permission.isGranted) {
       return true;
@@ -323,5 +370,20 @@ class _HistoricoState extends State<Historico> {
         return false;
       }
     }
+  }
+
+  //Seta false para o agrupamento por código na primeira vez que o app for aberto
+  Future<void> SharedPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final qtdGroup = prefs.getBool("QtdAgrupada");
+    if (qtdGroup == null) {
+      prefs.setBool("QtdAgrupada", false);
+      qtdAgrupada = prefs.getBool("QtdAgrupada");
+    } else {
+      qtdAgrupada = prefs.getBool("QtdAgrupada");
+    }
+    print(qtdAgrupada);
+    print("Deveria passar aqui");
+    _exibeTodosCodBarra();
   }
 }

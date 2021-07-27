@@ -99,13 +99,6 @@ class DatabaseHelper {
     return resultado;
   }
 
-  Future<int> updateCodBarrasPerCod(codigo_barras codBarras) async {
-    var db = await this.database;
-    var resultado = await db.update(colCodBarrasTable, codBarras.toMap(),
-        where: '$colCodigo = ?', whereArgs: [codBarras.codigo]);
-    return resultado;
-  }
-
   //Deleta o codigo de barras pelo ID
   Future<int> deleteCodBarras(int id) async {
     var db = await this.database;

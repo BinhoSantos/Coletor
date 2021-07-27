@@ -1,6 +1,7 @@
 import 'package:coletor_nativo/components/barcode_scanner_page.dart';
 import 'package:coletor_nativo/components/cadastro_codbarra.dart';
 import 'package:coletor_nativo/components/coletor_add_page.dart';
+import 'package:coletor_nativo/components/configuracao.dart';
 import 'package:coletor_nativo/components/historico_page.dart';
 import 'package:coletor_nativo/components/home_page.dart';
 import 'package:coletor_nativo/components/login_screen.dart';
@@ -27,6 +28,7 @@ class ThemeData2 extends StatelessWidget {
           '/addcodbarra': (context) => Coletor_Add(),
           '/historico': (context) => Historico(),
           "/cad": (context) => CadastroCodigoBarra(),
+          "/configuracao": (context) => Configuracao(modelador: 1),
         },
       );
 }

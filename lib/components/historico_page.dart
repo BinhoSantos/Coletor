@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'edita_codbarra_page.dart';
 
@@ -171,6 +172,7 @@ class _HistoricoState extends State<Historico> {
     }
   }
 
+  //Dá um setState forçado para poder rodar
   Future<void> _alteracaoConfiguracao() async {
     final configuracaoAlterada = await Navigator.push(
         context,
@@ -266,6 +268,7 @@ class _HistoricoState extends State<Historico> {
         });
   }
 
+  //Leitor de código de barras
   Future<void> scanBarcode() async {
     try {
       final barcode = await FlutterBarcodeScanner.scanBarcode(
@@ -309,6 +312,7 @@ class _HistoricoState extends State<Historico> {
     now = '_' + now + '_' + DateTime.now().month.toString();
     now = now + '_' + DateTime.now().year.toString();
     final path = await diretorio;
+    diretorio = '$path/Coleta$now.txt';
     return File('$path/Coleta$now.txt');
   }
 
@@ -317,6 +321,7 @@ class _HistoricoState extends State<Historico> {
     final file = await _localFile;
     db.deleteCodBarrasAll();
     _exibeTodosCodBarra();
+    Share.shareFiles([diretorio]);
     return file.writeAsString(listaBarra, mode: FileMode.write);
   }
 

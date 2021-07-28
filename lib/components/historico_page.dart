@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import 'edita_codbarra_page.dart';
 
 class Historico extends StatefulWidget {
@@ -23,6 +24,7 @@ class _HistoricoState extends State<Historico> {
   DatabaseHelper db = DatabaseHelper.instance;
   //Faz uma lista com os códigos registrados no banco.
   List<codigo_barras> codbarra = <codigo_barras>[];
+  List<codigo_barras> codbarraimpressao = <codigo_barras>[];
   String barcode = '';
   String listaBarra = '';
   String diretorio = '';
@@ -39,12 +41,8 @@ class _HistoricoState extends State<Historico> {
     if (widget.codbarra == null) {
       _editaCodBarra = codigo_barras(null, "", 1);
     }
-    codigo_barras c = codigo_barras(1, '1235958456156', 1);
-    db.insertCodBarra(c);
-
-    codigo_barras c1 = codigo_barras(2, '1235958456156', 1);
-    db.insertCodBarra(c1);
-
+    //codigo_barras c = codigo_barras(1, '1235958456156', 1);
+    //db.insertCodBarra(c);
     /*db.getCodBarras().then((lista) {
       print(lista);
     });*/
@@ -54,6 +52,8 @@ class _HistoricoState extends State<Historico> {
   //Metódo para exibir os códigos de barra na list view
   void _exibeTodosCodBarra() {
     print(qtdAgrupada);
+    db.getCodBarrasCount().then((value) => codbarraimpressao = value);
+
     if (qtdAgrupada == true) {
       db.getCodBarrasCount().then((lista) {
         setState(() {
@@ -78,15 +78,16 @@ class _HistoricoState extends State<Historico> {
         actions: <Widget>[
           IconButton(
               onPressed: () {
-                //decodeCodBarra();
-                _confirmaFechamento(context);
+                if (codbarraimpressao.isEmpty) {
+                  _showSemDados(context);
+                } else {
+                  _confirmaFechamento(context);
+                }
               },
               icon: Icon(Icons.upload)),
           IconButton(
               onPressed: () {
                 _alteracaoConfiguracao();
-                //decodeCodBarra();
-                //Navigator.of(context).pushNamed('/configuracao');
               },
               icon: Icon(Icons.settings)),
         ],
@@ -116,7 +117,7 @@ class _HistoricoState extends State<Historico> {
           child: Padding(
             padding: EdgeInsets.all(8),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.all(8),
@@ -138,9 +139,14 @@ class _HistoricoState extends State<Historico> {
                 IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
-                    _confirmaExclusao(
-                        context, int.parse(codbarra[index].codigo!), index);
-                    //_confirmaExclusao(context, codbarra[index].int!, index);
+                    if (qtdAgrupada == true) {
+                      _confirmaExclusao(
+                          context, int.parse(codbarra[index].codigo!), index);
+                    } else {
+                      _confirmaExclusao(context, codbarra[index].id!, index);
+                    }
+                    //Inserir o if do qtdAgrupada aqui e fazer a separação
+                    //
                   },
                 ),
               ],
@@ -148,7 +154,9 @@ class _HistoricoState extends State<Historico> {
           ),
         ),
         onTap: () {
-          _exibeCodBarra(codbarra: codbarra[index]);
+          if (qtdAgrupada == false) {
+            _exibeCodBarra(codbarra: codbarra[index]);
+          }
         });
   }
 
@@ -206,12 +214,34 @@ class _HistoricoState extends State<Historico> {
                   onPressed: () {
                     setState(() {
                       codbarra.removeAt(index);
-                      db.deleteCodBarrasStr(idCodBarra);
-                      //db.deleteCodBarras(Codigo);
+                      if (qtdAgrupada == true) {
+                        db.deleteCodBarrasStr(idCodBarra);
+                      } else {
+                        db.deleteCodBarras(idCodBarra);
+                      }
                       Navigator.of(context).pop();
                     });
                   },
                   child: Text("Excluir")),
+            ],
+          );
+        });
+  }
+
+  void _showSemDados(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Sem dados para a exportação."),
+            content: Text("Não existe nenhuma coleta para ser exportada."),
+            actions: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("Ok"),
+              ),
             ],
           );
         });
@@ -260,6 +290,7 @@ class _HistoricoState extends State<Historico> {
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
+                  Share.shareFiles([diretorio]);
                 },
                 child: Text("Ok"),
               ),
@@ -293,35 +324,23 @@ class _HistoricoState extends State<Historico> {
     }
   }
 
-  //Inicialmente a quebra da lista para se tornar String
-  void decodeCodBarra() {
-    var now = DateTime.now().day.toString();
-    now = '_' + now + '_' + DateTime.now().month.toString();
-    now = now + '_' + DateTime.now().year.toString();
-    print(now);
-    listaBarra = ('{');
-    listaBarra = listaBarra + codbarra.join('\n');
-    listaBarra = listaBarra + ('}');
-    print(listaBarra);
-    writeListaCodBarra();
-  }
-
 //Void para salvar um arquivo na memória do celular
   Future<File> get _localFile async {
-    var now = DateTime.now().day.toString();
+    var now = 'Coleta_';
+    now = now + DateTime.now().day.toString();
     now = '_' + now + '_' + DateTime.now().month.toString();
     now = now + '_' + DateTime.now().year.toString();
+    var uuid = Uuid().v1();
     final path = await diretorio;
-    diretorio = '$path/Coleta$now.txt';
-    return File('$path/Coleta$now.txt');
+    diretorio = '$path/$uuid$now.txt';
+    return File('$path/$uuid$now.txt');
   }
 
-//Void para salvar um arquivo na memória do celular
+  //Void para escrever no arquivo que será memória do celular
   Future<File> writeListaCodBarra() async {
     final file = await _localFile;
     db.deleteCodBarrasAll();
     _exibeTodosCodBarra();
-    Share.shareFiles([diretorio]);
     return file.writeAsString(listaBarra, mode: FileMode.write);
   }
 
@@ -348,22 +367,38 @@ class _HistoricoState extends State<Historico> {
           diretorio = directory.path;
           if (!await directory.exists()) {
             directory.create(recursive: true);
-            listaBarra = listaBarra + codbarra.join(',\n');
+            listaBarra = listaBarra + codbarraimpressao.join(',\n');
             print(listaBarra);
             writeListaCodBarra();
           }
           if (await directory.exists()) {
-            listaBarra = listaBarra + codbarra.join(',\n');
+            listaBarra = listaBarra + codbarraimpressao.join(',\n');
             print(listaBarra);
             writeListaCodBarra();
           }
+        }
+      } else {
+        //Na teoria esse código salva dentro da pasta do iPhone
+        if (await _requestPermission(Permission.storage)) {
+          directory = await getApplicationDocumentsDirectory();
+        } else {
+          return false;
+        }
+        if (!await directory.exists()) {
+          await directory.create(recursive: true);
+          diretorio = directory.path;
+          print(diretorio);
+        }
+        if (await directory.exists()) {
+          listaBarra = listaBarra + codbarraimpressao.join(',\n');
+          writeListaCodBarra();
         }
       }
     } catch (e) {}
     return false;
   }
 
-  //Metódo para verificar as permissões
+  //Metódo para verificar as permissões do Android ou IOS
   Future<bool> _requestPermission(Permission permission) async {
     if (await permission.isGranted) {
       return true;

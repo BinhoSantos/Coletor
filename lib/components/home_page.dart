@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:coletor_nativo/controller/user_controller.dart';
 import 'package:coletor_nativo/helpers/database_helpers.dart';
 import 'package:coletor_nativo/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, required this.title, this.codbarra}) : super(key: key);
@@ -21,6 +25,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    saveFile();
     if (widget.codbarra == null) {
       _editaCodBarra = codigo_barras(null, "", 1);
     }
@@ -31,6 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        centerTitle: true,
       ),
       drawer: Drawer(
         child: Column(children: <Widget>[
@@ -80,8 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             const SizedBox(height: 32),
             ButtonWidget(
-                text: 'Escaneie o código de barras',
-                onClicked: () => scanBarcode()),
+                text: 'Comece a escanear', onClicked: () => scanBarcode()),
             //onClicked: () => Navigator.of(context).pushNamed('/scan')),
           ],
         ),
@@ -110,6 +115,50 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     } on PlatformException {
       barcode = 'Um erro ocorreu, tente novamente';
+    }
+  }
+
+  //Void para salvar um arquivo na memória do celular
+  Future<bool> saveFile() async {
+    Directory directory;
+    try {
+      if (Platform.isAndroid) {
+        if (await _requestPermission(Permission.storage)) {
+          directory = (await getExternalStorageDirectory())!;
+          print(directory.path);
+          String newPath = "";
+          List<String> folders = directory.path.split("/");
+          for (int x = 1; x < folders.length; x++) {
+            String folder = folders[x];
+            if (folder != "Android") {
+              newPath += ("/" + folder);
+            } else
+              break;
+          }
+          newPath = newPath + "/AcesseColetor";
+          directory = Directory(newPath);
+          print(directory.path);
+          //var diretorio = directory.path;
+          if (!await directory.exists()) {
+            directory.create(recursive: true);
+          }
+        }
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  //Metódo para verificar as permissões
+  Future<bool> _requestPermission(Permission permission) async {
+    if (await permission.isGranted) {
+      return true;
+    } else {
+      var result = await permission.request();
+      if (result == PermissionStatus.granted) {
+        return true;
+      } else {
+        return false;
+      }
     }
   }
 }

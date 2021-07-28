@@ -141,16 +141,6 @@ class DatabaseHelper {
     db.close();
   }
 
-  //Altera o código de barras dentro do banco pelo CODIGO
-  Future<int> updateQtdCodBarras(codigo_barras codBarras) async {
-    var db = await this.database;
-
-    var resultado = await db.update(colCodBarrasTable, codBarras.toMap(),
-        where: '$colCodigo = ?', whereArgs: [codBarras.codigo]);
-
-    return resultado;
-  }
-
   //Convertendo em lista para aparecer no Formulário
   Future<List<codigo_barras>> getCodBarrasGroup() async {
     Database db = await this.database;
@@ -176,5 +166,41 @@ class DatabaseHelper {
         : [];
 
     return lista;
+  }
+
+  //Lista que puxa os valores contados
+  Future<List<codigo_barras>> getCodBarraRepetido(String valor) async {
+    Database db = await this.database;
+
+    var resultado = await db.rawQuery(
+        'SELECT $colCodigo, SUM($colQuantidade) AS quantidade FROM $colCodBarrasTable WHERE $colCodigo = $valor');
+
+    List<codigo_barras> lista = resultado.isNotEmpty
+        ? resultado.map((c) => codigo_barras.fromMap(c)).toList()
+        : [];
+
+    print(lista);
+    return lista;
+  }
+
+  //Altera o código de barras dentro do banco pelo CODIGO
+  Future<List> updateQtdCodBarras(String valor) async {
+    var db = await this.database;
+    List<codigo_barras> teste = <codigo_barras>[];
+    getCodBarraRepetido(valor).then((value) => teste = value);
+
+    if (teste.isEmpty) {
+      print(teste);
+      return teste;
+    } else {
+      var resultado = await db.rawQuery(
+          'UPDATE $colCodBarrasTable SET $colQuantidade = $colQuantidade + 1 WHERE $colCodigo = $valor');
+
+      List<codigo_barras> lista = resultado.isNotEmpty
+          ? resultado.map((c) => codigo_barras.fromMap(c)).toList()
+          : [];
+      print(lista);
+      return lista;
+    }
   }
 }

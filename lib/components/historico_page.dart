@@ -28,6 +28,7 @@ class _HistoricoState extends State<Historico> {
   String barcode = '';
   String listaBarra = '';
   String diretorio = '';
+  String androidVersion = '';
   bool? qtdAgrupada;
   int trava = 1;
   late codigo_barras _editaCodBarra;
@@ -35,6 +36,7 @@ class _HistoricoState extends State<Historico> {
   @override
   void initState() {
     super.initState();
+    androidVersion = (Platform.operatingSystemVersion);
 
     SharedPrefs();
 
@@ -42,7 +44,7 @@ class _HistoricoState extends State<Historico> {
       _editaCodBarra = codigo_barras(null, "", 1);
     }
     //codigo_barras c = codigo_barras(1, '1235958456156', 1);
-    //db.insertCodBarra(c);
+    // db.insertCodBarra(c);
     /*db.getCodBarras().then((lista) {
       print(lista);
     });*/
@@ -364,6 +366,10 @@ class _HistoricoState extends State<Historico> {
           newPath = newPath + "/AcesseColetor";
           directory = Directory(newPath);
           print(directory.path);
+          //Se o Android for da versão 11 ele salva no diretório especifico da pasta.
+          if (androidVersion.contains("11")) {
+            directory = (await getExternalStorageDirectory())!;
+          }
           diretorio = directory.path;
           if (!await directory.exists()) {
             directory.create(recursive: true);

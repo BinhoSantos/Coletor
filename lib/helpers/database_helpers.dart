@@ -29,7 +29,7 @@ class DatabaseHelper {
   //Inicializa o banco de dados
   Future<Database> initializeDatabase() async {
     Directory directory = await getApplicationDocumentsDirectory();
-    String path = directory.path + "codigo_barras.db";
+    String path = directory.path + "/codigo_barras.db";
 
     var codBarrasDatabase =
         await openDatabase(path, version: 1, onCreate: _createDB);

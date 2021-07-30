@@ -28,6 +28,7 @@ class _HistoricoState extends State<Historico> {
   String barcode = '';
   String listaBarra = '';
   String diretorio = '';
+  String osVersion = '';
   bool? qtdAgrupada;
   int trava = 1;
   late codigo_barras _editaCodBarra;
@@ -35,14 +36,19 @@ class _HistoricoState extends State<Historico> {
   @override
   void initState() {
     super.initState();
+    osVersion = Platform.operatingSystem;
+    print(osVersion);
 
     SharedPrefs();
 
     if (widget.codbarra == null) {
       _editaCodBarra = codigo_barras(null, "", 1);
     }
-    //codigo_barras c = codigo_barras(1, '1235958456156', 1);
-    //db.insertCodBarra(c);
+    codigo_barras c = codigo_barras(null, '1235958456156', 1);
+    db.insertCodBarra(c);
+
+    codigo_barras c1 = codigo_barras(null, '1235958456189', 1);
+    db.insertCodBarra(c1);
     /*db.getCodBarras().then((lista) {
       print(lista);
     });*/
@@ -84,7 +90,7 @@ class _HistoricoState extends State<Historico> {
                   _confirmaFechamento(context);
                 }
               },
-              icon: Icon(Icons.upload)),
+              icon: Icon(Icons.upload_file_sharp)),
           IconButton(
               onPressed: () {
                 _alteracaoConfiguracao();
@@ -269,7 +275,13 @@ class _HistoricoState extends State<Historico> {
                       saveFile();
                       Navigator.of(context).pop();
                       //_exibeTodosCodBarra();
-                      _showCaminhoExp();
+                      if (osVersion == 'ios') {
+                        _showCaminhoExp(
+                            'Seus dados foram exportados para a pasta Coletor no "Seu Iphone"');
+                      } else {
+                        _showCaminhoExp(
+                            'Seus dados foram exportados para a pasta AcesseColetor nos seus documentos');
+                      }
                     });
                   },
                   child: Text("Exportar")),
@@ -278,14 +290,13 @@ class _HistoricoState extends State<Historico> {
         });
   }
 
-  void _showCaminhoExp() {
+  void _showCaminhoExp(String x) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text("Local de Exportação"),
-            content: Text(
-                "Seus dados foram exportados para a pasta AcesseColetor nos documentos"),
+            content: Text(x),
             actions: <Widget>[
               ElevatedButton(
                 onPressed: () {
@@ -367,12 +378,17 @@ class _HistoricoState extends State<Historico> {
           diretorio = directory.path;
           if (!await directory.exists()) {
             directory.create(recursive: true);
-            listaBarra = listaBarra + codbarraimpressao.join(',\n');
+            listaBarra = '{';
+            listaBarra = listaBarra + codbarraimpressao.join('');
+            listaBarra = '/n}';
             print(listaBarra);
             writeListaCodBarra();
           }
           if (await directory.exists()) {
-            listaBarra = listaBarra + codbarraimpressao.join(',\n');
+            listaBarra = '{';
+            listaBarra = listaBarra + codbarraimpressao.join('');
+            listaBarra = '\n}';
+            print(listaBarra);
             print(listaBarra);
             writeListaCodBarra();
           }
@@ -388,10 +404,15 @@ class _HistoricoState extends State<Historico> {
           await directory.create(recursive: true);
           diretorio = directory.path;
           print(diretorio);
+          writeListaCodBarra();
         }
         if (await directory.exists()) {
-          listaBarra = listaBarra + codbarraimpressao.join(',\n');
+          listaBarra = listaBarra + codbarraimpressao.join('');
+          listaBarra = listaBarra + '\n';
+          print(listaBarra);
+          diretorio = directory.path;
           writeListaCodBarra();
+          print(diretorio);
         }
       }
     } catch (e) {}

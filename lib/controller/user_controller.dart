@@ -27,7 +27,9 @@ class codigo_barras {
   String toString() {
     String teste = "\n";
     String Space = "         ";
-    String resultado = ('{' +
+    String resultado = ('$codigo : $quantidade');
+
+    /*String resultado = ('{' +
         teste +
         Space +
         'quantidade:"$quantidade"' +
@@ -35,7 +37,8 @@ class codigo_barras {
         Space +
         'codigo:"$codigo"' +
         teste +
-        '}');
+        '}')*/
+    ;
     // Retorna os valores como String
     //return "codigo_barras => (id: $id, codigo: $codigo, quantidade: $quantidade)";
     return resultado;

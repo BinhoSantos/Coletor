@@ -12,6 +12,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'edita_codbarra_page.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class Historico extends StatefulWidget {
   const Historico({Key? key, this.codbarra}) : super(key: key);
@@ -25,10 +26,11 @@ class _HistoricoState extends State<Historico> {
   //Faz uma lista com os códigos registrados no banco.
   List<codigo_barras> codbarra = <codigo_barras>[];
   List<codigo_barras> codbarraimpressao = <codigo_barras>[];
+  static final _deviceInfoPlugin = DeviceInfoPlugin();
   String barcode = '';
   String listaBarra = '';
   String diretorio = '';
-  String androidVersion = '';
+  int androidVersion = 0;
   bool? qtdAgrupada;
   int trava = 1;
   late codigo_barras _editaCodBarra;
@@ -36,7 +38,7 @@ class _HistoricoState extends State<Historico> {
   @override
   void initState() {
     super.initState();
-    androidVersion = (Platform.operatingSystemVersion);
+    getSDKVersion();
 
     SharedPrefs();
 
@@ -44,7 +46,9 @@ class _HistoricoState extends State<Historico> {
       _editaCodBarra = codigo_barras(null, "", 1);
     }
     //codigo_barras c = codigo_barras(1, '1235958456156', 1);
-    // db.insertCodBarra(c);
+    //db.insertCodBarra(c);
+    //codigo_barras c1 = codigo_barras(2, '1235958456185', 1);
+    //db.insertCodBarra(c1);
     /*db.getCodBarras().then((lista) {
       print(lista);
     });*/
@@ -86,7 +90,7 @@ class _HistoricoState extends State<Historico> {
                   _confirmaFechamento(context);
                 }
               },
-              icon: Icon(Icons.upload)),
+              icon: Icon(Icons.upload_file_rounded)),
           IconButton(
               onPressed: () {
                 _alteracaoConfiguracao();
@@ -256,8 +260,7 @@ class _HistoricoState extends State<Historico> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text("Deseja realizar a exportação?"),
-            content:
-                Text("Ao exportar a coleta todos os dados serão deletados."),
+            content: Text("Confirme se deseja prosseguir com a exportação."),
             actions: <Widget>[
               ElevatedButton(
                 onPressed: () {
@@ -267,12 +270,9 @@ class _HistoricoState extends State<Historico> {
               ),
               ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      saveFile();
-                      Navigator.of(context).pop();
-                      //_exibeTodosCodBarra();
-                      _showCaminhoExp();
-                    });
+                    Navigator.of(context).pop();
+                    _showManterDados(context);
+                    //_exibeTodosCodBarra();
                   },
                   child: Text("Exportar")),
             ],
@@ -280,14 +280,61 @@ class _HistoricoState extends State<Historico> {
         });
   }
 
-  void _showCaminhoExp() {
+  //Void que mostra o alertbox que leva o arquivo .txt
+  void _showManterDados(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Deseja apagar os dados?"),
+            content: Text(
+                "Ao aceitar todos os dados coletados serão deletados e uma nova coleta será iniciada."),
+            actions: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    saveFile(false);
+                    Navigator.of(context).pop();
+                    //_exibeTodosCodBarra();
+                    if (androidVersion >= 30) {
+                      _showCaminhoExp(
+                          "Seus dados foram exportados para a pasta matriz do Coletor");
+                    } else {
+                      _showCaminhoExp(
+                          "Seus dados foram exportados para a pasta AcesseColetor nos documentos");
+                    }
+                  });
+                },
+                child: Text("Manter"),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      saveFile(true);
+                      Navigator.of(context).pop();
+                      //_exibeTodosCodBarra();
+                      if (androidVersion >= 30) {
+                        _showCaminhoExp(
+                            "Seus dados foram exportados para a pasta matriz do Coletor");
+                      } else {
+                        _showCaminhoExp(
+                            "Seus dados foram exportados para a pasta AcesseColetor nos documentos");
+                      }
+                    });
+                  },
+                  child: Text("Apagar")),
+            ],
+          );
+        });
+  }
+
+  void _showCaminhoExp(String x) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text("Local de Exportação"),
-            content: Text(
-                "Seus dados foram exportados para a pasta AcesseColetor nos documentos"),
+            content: Text(x),
             actions: <Widget>[
               ElevatedButton(
                 onPressed: () {
@@ -332,6 +379,8 @@ class _HistoricoState extends State<Historico> {
     now = now + DateTime.now().day.toString();
     now = '_' + now + '_' + DateTime.now().month.toString();
     now = now + '_' + DateTime.now().year.toString();
+    now = now + '_' + DateTime.now().hour.toString();
+    now = now + '_' + DateTime.now().minute.toString();
     var uuid = Uuid().v1();
     final path = await diretorio;
     diretorio = '$path/$uuid$now.txt';
@@ -339,48 +388,70 @@ class _HistoricoState extends State<Historico> {
   }
 
   //Void para escrever no arquivo que será memória do celular
-  Future<File> writeListaCodBarra() async {
+  Future<File> writeListaCodBarra(bool deletar) async {
     final file = await _localFile;
-    db.deleteCodBarrasAll();
+    if (deletar == true) {
+      db.deleteCodBarrasAll();
+    }
     _exibeTodosCodBarra();
     return file.writeAsString(listaBarra, mode: FileMode.write);
   }
 
   //Void para salvar um arquivo na memória do celular
-  Future<bool> saveFile() async {
+  Future<bool> saveFile(bool deletar) async {
     Directory directory;
     try {
       if (Platform.isAndroid) {
-        if (await _requestPermission(Permission.storage)) {
-          directory = (await getExternalStorageDirectory())!;
-          print(directory.path);
-          String newPath = "";
-          List<String> folders = directory.path.split("/");
-          for (int x = 1; x < folders.length; x++) {
-            String folder = folders[x];
-            if (folder != "Android") {
-              newPath += ("/" + folder);
-            } else
-              break;
-          }
-          newPath = newPath + "/AcesseColetor";
-          directory = Directory(newPath);
-          print(directory.path);
-          //Se o Android for da versão 11 ele salva no diretório especifico da pasta.
-          if (androidVersion.contains("11")) {
+        if (androidVersion < 30) {
+          //Condição para versões do Android antes do 11
+          if (await _requestPermission(Permission.storage)) {
             directory = (await getExternalStorageDirectory())!;
+            print(directory.path);
+            String newPath = "";
+            List<String> folders = directory.path.split("/");
+            for (int x = 1; x < folders.length; x++) {
+              String folder = folders[x];
+              if (folder != "Android") {
+                newPath += ("/" + folder);
+              } else
+                break;
+            }
+
+            newPath = newPath + "/AcesseColetor";
+            directory = Directory(newPath);
+            print(directory.path);
+            diretorio = directory.path;
+            if (!await directory.exists()) {
+              directory.create(recursive: true);
+              listaBarra = codbarraimpressao.join('\n');
+              listaBarra = listaBarra + '\n';
+              print(listaBarra);
+              writeListaCodBarra(deletar);
+            }
+            if (await directory.exists()) {
+              listaBarra = codbarraimpressao.join('\n');
+              listaBarra = listaBarra + '\n';
+              print(listaBarra);
+              writeListaCodBarra(deletar);
+            }
           }
+        } else {
+          //Caso a SDK do Android seja maior que 29 e consequentemente acima do
+          //Android 10
+          directory = (await getExternalStorageDirectory())!;
           diretorio = directory.path;
           if (!await directory.exists()) {
             directory.create(recursive: true);
-            listaBarra = listaBarra + codbarraimpressao.join(',\n');
+            listaBarra = codbarraimpressao.join('\n');
+            listaBarra = listaBarra + '\n';
             print(listaBarra);
-            writeListaCodBarra();
+            writeListaCodBarra(deletar);
           }
           if (await directory.exists()) {
-            listaBarra = listaBarra + codbarraimpressao.join(',\n');
+            listaBarra = codbarraimpressao.join('\n');
+            listaBarra = listaBarra + '\n';
             print(listaBarra);
-            writeListaCodBarra();
+            writeListaCodBarra(deletar);
           }
         }
       } else {
@@ -397,7 +468,7 @@ class _HistoricoState extends State<Historico> {
         }
         if (await directory.exists()) {
           listaBarra = listaBarra + codbarraimpressao.join(',\n');
-          writeListaCodBarra();
+          writeListaCodBarra(deletar);
         }
       }
     } catch (e) {}
@@ -431,5 +502,13 @@ class _HistoricoState extends State<Historico> {
     print(qtdAgrupada);
     print("Deveria passar aqui");
     _exibeTodosCodBarra();
+  }
+
+  // Pega a versão da Sdk do android
+  Future<String> getSDKVersion() async {
+    final info = await _deviceInfoPlugin.androidInfo;
+    androidVersion = info.version.sdkInt!.toInt();
+    print(androidVersion);
+    return info.version.sdkInt.toString();
   }
 }

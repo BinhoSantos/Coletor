@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:coletor_nativo/controller/user_controller.dart';
 import 'package:coletor_nativo/helpers/database_helpers.dart';
 import 'package:coletor_nativo/widgets/button_widget.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -21,10 +22,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   DatabaseHelper db = DatabaseHelper.instance;
   String barcode = '';
+  static final _deviceInfoPlugin = DeviceInfoPlugin();
   late codigo_barras _editaCodBarra;
+  int androidVersion = 0;
   @override
   void initState() {
     super.initState();
+    //getSDKVersion();
     saveFile();
     if (widget.codbarra == null) {
       _editaCodBarra = codigo_barras(null, "", 1);
@@ -67,6 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: TextStyle(fontSize: 18),
               ),
               onTap: () {
+                Navigator.pop(context);
                 Navigator.of(context).pushNamed('/historico');
               }),
           ListTile(
@@ -77,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               onTap: () {
                 scanBarcode();
+                Navigator.pop(context);
               }),
         ]),
       ),
@@ -121,26 +127,31 @@ class _MyHomePageState extends State<MyHomePage> {
   //Void para salvar um arquivo na memória do celular
   Future<bool> saveFile() async {
     Directory directory;
+    final info = await _deviceInfoPlugin.androidInfo;
+    androidVersion = info.version.sdkInt!.toInt();
+    print(androidVersion);
     try {
       if (Platform.isAndroid) {
-        if (await _requestPermission(Permission.storage)) {
-          directory = (await getExternalStorageDirectory())!;
-          print(directory.path);
-          String newPath = "";
-          List<String> folders = directory.path.split("/");
-          for (int x = 1; x < folders.length; x++) {
-            String folder = folders[x];
-            if (folder != "Android") {
-              newPath += ("/" + folder);
-            } else
-              break;
-          }
-          newPath = newPath + "/AcesseColetor";
-          directory = Directory(newPath);
-          print(directory.path);
-          //var diretorio = directory.path;
-          if (!await directory.exists()) {
-            directory.create(recursive: true);
+        if (androidVersion < 30) {
+          if (await _requestPermission(Permission.storage)) {
+            directory = (await getExternalStorageDirectory())!;
+            print(directory.path);
+            String newPath = "";
+            List<String> folders = directory.path.split("/");
+            for (int x = 1; x < folders.length; x++) {
+              String folder = folders[x];
+              if (folder != "Android") {
+                newPath += ("/" + folder);
+              } else
+                break;
+            }
+            newPath = newPath + "/AcesseColetor";
+            directory = Directory(newPath);
+            print(directory.path);
+            //var diretorio = directory.path;
+            if (!await directory.exists()) {
+              directory.create(recursive: true);
+            }
           }
         }
       }
@@ -160,5 +171,13 @@ class _MyHomePageState extends State<MyHomePage> {
         return false;
       }
     }
+  }
+
+  // Pega a versão da Sdk do android
+  Future<String> getSDKVersion() async {
+    final info = await _deviceInfoPlugin.androidInfo;
+    androidVersion = info.version.sdkInt!.toInt();
+    print(androidVersion);
+    return info.version.sdkInt.toString();
   }
 }

@@ -271,20 +271,48 @@ class _HistoricoState extends State<Historico> {
               ),
               ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      saveFile();
-                      Navigator.of(context).pop();
-                      //_exibeTodosCodBarra();
-                      if (osVersion == 'ios') {
-                        _showCaminhoExp(
-                            'Seus dados foram exportados para a pasta Coletor no "Seu Iphone"');
-                      } else {
-                        _showCaminhoExp(
-                            'Seus dados foram exportados para a pasta AcesseColetor nos seus documentos');
-                      }
-                    });
+                    Navigator.of(context).pop();
+                    //_exibeTodosCodBarra();
+                    _showManterDados(context);
                   },
                   child: Text("Exportar")),
+            ],
+          );
+        });
+  }
+
+  void _showManterDados(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Deseja apagar os dados?"),
+            content: Text(
+                "Ao aceitar todos os dados coletados serão deletados e uma nova coleta será iniciada."),
+            actions: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    saveFile(false);
+                    Navigator.of(context).pop();
+                    //_exibeTodosCodBarra();
+                    _showCaminhoExp(
+                        'Seus dados foram exportados para a pasta Coletor no "Seu Iphone"');
+                  });
+                },
+                child: Text("Manter"),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      saveFile(true);
+                      Navigator.of(context).pop();
+                      //_exibeTodosCodBarra();
+                      _showCaminhoExp(
+                          'Seus dados foram exportados para a pasta Coletor no "Seu Iphone"');
+                    });
+                  },
+                  child: Text("Apagar")),
             ],
           );
         });
@@ -341,22 +369,26 @@ class _HistoricoState extends State<Historico> {
     now = now + DateTime.now().day.toString();
     now = '_' + now + '_' + DateTime.now().month.toString();
     now = now + '_' + DateTime.now().year.toString();
-    var uuid = Uuid().v1();
+    now = now + '_' + DateTime.now().hour.toString();
+    now = now + '_' + DateTime.now().minute.toString();
+    String uuid = Uuid().v1();
     final path = await diretorio;
     diretorio = '$path/$uuid$now.txt';
     return File('$path/$uuid$now.txt');
   }
 
   //Void para escrever no arquivo que será memória do celular
-  Future<File> writeListaCodBarra() async {
+  Future<File> writeListaCodBarra(bool deletar) async {
     final file = await _localFile;
-    db.deleteCodBarrasAll();
+    if (deletar == true) {
+      db.deleteCodBarrasAll();
+    }
     _exibeTodosCodBarra();
     return file.writeAsString(listaBarra, mode: FileMode.write);
   }
 
   //Void para salvar um arquivo na memória do celular
-  Future<bool> saveFile() async {
+  Future<bool> saveFile(bool deletar) async {
     Directory directory;
     try {
       if (Platform.isAndroid) {
@@ -378,19 +410,17 @@ class _HistoricoState extends State<Historico> {
           diretorio = directory.path;
           if (!await directory.exists()) {
             directory.create(recursive: true);
-            listaBarra = '{';
-            listaBarra = listaBarra + codbarraimpressao.join('');
-            listaBarra = '/n}';
+            listaBarra = listaBarra + codbarraimpressao.join('\n');
+            listaBarra = '/n';
             print(listaBarra);
-            writeListaCodBarra();
+            writeListaCodBarra(deletar);
           }
           if (await directory.exists()) {
-            listaBarra = '{';
-            listaBarra = listaBarra + codbarraimpressao.join('');
-            listaBarra = '\n}';
+            listaBarra = listaBarra + codbarraimpressao.join('\n');
+            listaBarra = '\n';
             print(listaBarra);
             print(listaBarra);
-            writeListaCodBarra();
+            writeListaCodBarra(deletar);
           }
         }
       } else {
@@ -404,14 +434,14 @@ class _HistoricoState extends State<Historico> {
           await directory.create(recursive: true);
           diretorio = directory.path;
           print(diretorio);
-          writeListaCodBarra();
+          writeListaCodBarra(deletar);
         }
         if (await directory.exists()) {
-          listaBarra = listaBarra + codbarraimpressao.join('');
+          listaBarra = codbarraimpressao.join('\n');
           listaBarra = listaBarra + '\n';
           print(listaBarra);
           diretorio = directory.path;
-          writeListaCodBarra();
+          writeListaCodBarra(deletar);
           print(diretorio);
         }
       }

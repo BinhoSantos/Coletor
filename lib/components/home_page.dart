@@ -67,6 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: TextStyle(fontSize: 18),
               ),
               onTap: () {
+                Navigator.of(context).pop();
                 Navigator.of(context).pushNamed('/historico');
               }),
           ListTile(
@@ -77,6 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               onTap: () {
                 scanBarcode();
+                Navigator.of(context).pop();
               }),
         ]),
       ),

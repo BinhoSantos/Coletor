@@ -27,7 +27,7 @@ class codigo_barras {
   String toString() {
     String teste = "\n";
     String Space = "         ";
-    String resultado = (teste + Space + '"$codigo" : "$quantidade"');
+    String resultado = ('$codigo : $quantidade');
     /*String resultado = ('{' +
         teste +
         Space +

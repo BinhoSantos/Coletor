@@ -50,7 +50,7 @@ class _ConfiguracaoState extends State<Configuracao> {
                       ),
                       Text(
                         "Agrupa a quantidade de itens dos\ncódigos repetidos",
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                        style: TextStyle(fontSize: 14),
                       ),
                     ],
                   ),
@@ -80,7 +80,7 @@ class _ConfiguracaoState extends State<Configuracao> {
                       ),
                       Text(
                         "Ativa o modo escuro do aplicativo.",
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                        style: TextStyle(fontSize: 14),
                       ),
                     ],
                   ),

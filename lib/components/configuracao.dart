@@ -1,4 +1,5 @@
 import 'package:coletor_nativo/controller/agrupa_quantidade.dart';
+import 'package:coletor_nativo/controller/dark_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,6 +13,7 @@ class Configuracao extends StatefulWidget {
 class _ConfiguracaoState extends State<Configuracao> {
   var agrupaQtd = false;
   var qtdGroup;
+  var darkMode;
 
   @override
   void initState() {
@@ -26,37 +28,69 @@ class _ConfiguracaoState extends State<Configuracao> {
   }
 
   _listaConfiguracoes(BuildContext context) {
-    return Container(
-      child: Card(
-        child: Padding(
-          padding: EdgeInsets.all(8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      "Agrupamento por código",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    Container(
-                      height: 10,
-                    ),
-                    Text(
-                      "Agrupa a quantidade de itens dos\ncódigos repetidos",
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
-                    ),
-                  ],
+    return Column(
+      children: [
+        Card(
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        "Agrupamento por código",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      Container(
+                        height: 10,
+                      ),
+                      Text(
+                        "Agrupa a quantidade de itens dos\ncódigos repetidos",
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              _customSwitch(context, qtdGroup),
-            ],
+                _customSwitch(context, qtdGroup),
+              ],
+            ),
           ),
         ),
-      ),
+        Card(
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        "Modo Escuro",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      Container(
+                        height: 10,
+                      ),
+                      Text(
+                        "Ativa o modo escuro do aplicativo",
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+                _customSwitchDark(context, darkMode),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -88,6 +122,16 @@ class _ConfiguracaoState extends State<Configuracao> {
             SharedPrefs(agrupaQtd);
             getShared();
           });
+        });
+  }
+
+  _customSwitchDark(BuildContext context, bool x) {
+    return Switch(
+        value: DarkMode
+            .instance.isDarkTheme, //Atribui value ao booleano da dark_mode.dart
+        onChanged: (value) {
+          //Quando o Switch for utilizado
+          DarkMode.instance.changeTheme();
         });
   }
 

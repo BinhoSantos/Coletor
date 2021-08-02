@@ -25,8 +25,8 @@ class codigo_barras {
 
   @override
   String toString() {
-    String teste = "\n";
-    String Space = "         ";
+    //String teste = "\n";
+    //String Space = "         ";
     String resultado = ('$codigo : $quantidade');
 
     /*String resultado = ('{' +

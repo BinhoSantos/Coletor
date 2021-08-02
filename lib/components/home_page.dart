@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, required this.title, this.codbarra}) : super(key: key);
@@ -53,12 +54,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 Container(
                   margin: EdgeInsets.only(top: 18),
                   width: double.infinity,
-                  height: 10,
+                  height: 120,
                   child: Center(
-                    child: Text(
-                      "Coletor",
-                      style: TextStyle(fontSize: 20, color: Colors.white),
-                    ),
+                    child: Image.asset('assets/images/ICONE-BRASIL.png'),
                   ),
                 )
               ],

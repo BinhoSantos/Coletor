@@ -14,9 +14,6 @@ Future<void> main() async {
   } else {
     DarkMode.instance.isDarkTheme = prefs.getBool("DarkMode")!;
   }
-
-  DarkMode.instance.isDarkTheme = prefs.getBool("DarkMode")!;
-
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

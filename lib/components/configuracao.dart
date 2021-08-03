@@ -19,7 +19,6 @@ class _ConfiguracaoState extends State<Configuracao> {
   void initState() {
     super.initState();
     getShared();
-    getSharedDarkMode();
   }
 
   @override
@@ -144,21 +143,9 @@ class _ConfiguracaoState extends State<Configuracao> {
     print(qtdAgrupada);
   }
 
-  Future<void> SharedPrefsDarkMode(bool x) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool("DarkMode", x);
-    DarkMode().changeTheme();
-  }
-
   Future<void> getShared() async {
     final prefs = await SharedPreferences.getInstance();
     qtdGroup = prefs.getBool("QtdAgrupada");
-    setState(() {});
-  }
-
-  Future<void> getSharedDarkMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    darkMode = prefs.getBool("DarkMode");
     setState(() {});
   }
 

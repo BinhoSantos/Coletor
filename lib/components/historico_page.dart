@@ -45,8 +45,8 @@ class _HistoricoState extends State<Historico> {
     if (widget.codbarra == null) {
       _editaCodBarra = codigo_barras(null, "", 1);
     }
-    //codigo_barras c = codigo_barras(1, '1235958456156', 1);
-    //db.insertCodBarra(c);
+    codigo_barras c = codigo_barras(null, '01057072', 1);
+    db.insertCodBarra(c);
     //codigo_barras c1 = codigo_barras(2, '1235958456185', 1);
     //db.insertCodBarra(c1);
     /*db.getCodBarras().then((lista) {
@@ -147,9 +147,13 @@ class _HistoricoState extends State<Historico> {
                   onPressed: () {
                     if (qtdAgrupada == true) {
                       _confirmaExclusao(
-                          context, int.parse(codbarra[index].codigo!), index);
+                          context,
+                          int.parse(codbarra[index].codigo!),
+                          (codbarra[index].codigo!),
+                          index);
                     } else {
-                      _confirmaExclusao(context, codbarra[index].id!, index);
+                      _confirmaExclusao(context, codbarra[index].id!,
+                          (codbarra[index].codigo!), index);
                     }
                     //Inserir o if do qtdAgrupada aqui e fazer a separação
                     //
@@ -202,7 +206,8 @@ class _HistoricoState extends State<Historico> {
   }
 
   //Void que exclui o código de barras do banco
-  void _confirmaExclusao(BuildContext context, int idCodBarra, index) {
+  void _confirmaExclusao(
+      BuildContext context, int idCodBarra, String codCodigoBarra, index) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -221,7 +226,7 @@ class _HistoricoState extends State<Historico> {
                     setState(() {
                       codbarra.removeAt(index);
                       if (qtdAgrupada == true) {
-                        db.deleteCodBarrasStr(idCodBarra);
+                        db.deleteCodBarrasStr(codCodigoBarra);
                       } else {
                         db.deleteCodBarras(idCodBarra);
                       }

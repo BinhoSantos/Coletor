@@ -110,7 +110,7 @@ class DatabaseHelper {
   }
 
   //Deleta o codigo de barras pelo Codigo
-  Future<int> deleteCodBarrasStr(int codigo) async {
+  Future<int> deleteCodBarrasStr(String codigo) async {
     var db = await this.database;
 
     var resultado = await db.delete(colCodBarrasTable,

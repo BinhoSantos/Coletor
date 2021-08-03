@@ -100,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> scanBarcode() async {
     try {
-      final barcode = await FlutterBarcodeScanner.scanBarcode(
+      var barcode = await FlutterBarcodeScanner.scanBarcode(
         '#010101',
         'Cancelar',
         true,
@@ -112,6 +112,9 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         this.barcode = barcode;
         if (barcode != "" && barcode != "-1") {
+          if (barcode.length == 12) {
+            barcode = '0' + barcode;
+          }
           _editaCodBarra = codigo_barras(null, barcode, 1);
           db.insertCodBarra(_editaCodBarra);
           Navigator.of(context).pushNamed('/historico');

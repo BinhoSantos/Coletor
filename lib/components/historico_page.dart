@@ -45,8 +45,8 @@ class _HistoricoState extends State<Historico> {
     if (widget.codbarra == null) {
       _editaCodBarra = codigo_barras(null, "", 1);
     }
-    codigo_barras c = codigo_barras(null, '01057072', 1);
-    db.insertCodBarra(c);
+    //codigo_barras c = codigo_barras(null, '12345ABCDE', 1);
+    //db.insertCodBarra(c);
     //codigo_barras c1 = codigo_barras(2, '1235958456185', 1);
     //db.insertCodBarra(c1);
     /*db.getCodBarras().then((lista) {
@@ -147,10 +147,7 @@ class _HistoricoState extends State<Historico> {
                   onPressed: () {
                     if (qtdAgrupada == true) {
                       _confirmaExclusao(
-                          context,
-                          int.parse(codbarra[index].codigo!),
-                          (codbarra[index].codigo!),
-                          index);
+                          context, 1, (codbarra[index].codigo!), index);
                     } else {
                       _confirmaExclusao(context, codbarra[index].id!,
                           (codbarra[index].codigo!), index);
@@ -356,7 +353,7 @@ class _HistoricoState extends State<Historico> {
   //Leitor de código de barras
   Future<void> scanBarcode() async {
     try {
-      final barcode = await FlutterBarcodeScanner.scanBarcode(
+      var barcode = await FlutterBarcodeScanner.scanBarcode(
         '#010101',
         'Cancelar',
         true,
@@ -368,6 +365,9 @@ class _HistoricoState extends State<Historico> {
       setState(() {
         this.barcode = barcode;
         if (barcode != "" && barcode != "-1") {
+          if (barcode.length == 12) {
+            barcode = '0' + barcode;
+          }
           _editaCodBarra = codigo_barras(null, barcode, 1);
           db.insertCodBarra(_editaCodBarra);
           _exibeTodosCodBarra();

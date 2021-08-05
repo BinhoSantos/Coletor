@@ -26,14 +26,20 @@ class _HistoricoState extends State<Historico> {
   //Faz uma lista com os códigos registrados no banco.
   List<codigo_barras> codbarra = <codigo_barras>[];
   List<codigo_barras> codbarraimpressao = <codigo_barras>[];
+
+  //Variávéis utilizadas no processo
   static final _deviceInfoPlugin = DeviceInfoPlugin();
   String barcode = '';
   String listaBarra = '';
+  String valorDigitado = "";
   String diretorio = '';
   int androidVersion = 0;
-  bool? qtdAgrupada;
   int trava = 1;
+  bool? qtdAgrupada;
+  var leitorFisico;
   late codigo_barras _editaCodBarra;
+  final msgController = TextEditingController();
+  final _focus = FocusNode();
 
   @override
   void initState() {
@@ -41,6 +47,7 @@ class _HistoricoState extends State<Historico> {
     getSDKVersion();
 
     SharedPrefs();
+    SharedPrefsLeitorReal();
 
     if (widget.codbarra == null) {
       _editaCodBarra = codigo_barras(null, "", 1);
@@ -77,42 +84,70 @@ class _HistoricoState extends State<Historico> {
 
   //Widget principal do projeto
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Histórico"),
-        centerTitle: true,
-        actions: <Widget>[
-          IconButton(
-              onPressed: () {
-                if (codbarraimpressao.isEmpty) {
-                  _showSemDados(context);
-                } else {
-                  _confirmaFechamento(context);
-                }
-              },
-              icon: Icon(Icons.upload_file_rounded)),
-          IconButton(
-              onPressed: () {
-                _alteracaoConfiguracao();
-              },
-              icon: Icon(Icons.settings)),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          scanBarcode();
-          //Navigator.of(context).pushNamed('/scan');
-          //_exibeCodBarra();
-        },
-        child: Icon(Icons.add),
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: codbarra.length,
-        itemBuilder: (context, int index) {
-          return _listaCodBarras(context, index);
-        },
-      ),
+    return GestureDetector(
+      onTap: () {
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
+      },
+      child: Scaffold(
+          appBar: AppBar(
+            title: Text("Histórico"),
+            centerTitle: true,
+            actions: <Widget>[
+              IconButton(
+                  onPressed: () {
+                    if (codbarraimpressao.isEmpty) {
+                      _showSemDados(context);
+                    } else {
+                      _confirmaFechamento(context);
+                    }
+                  },
+                  icon: Icon(Icons.upload_file_rounded)),
+              IconButton(
+                  onPressed: () {
+                    _alteracaoConfiguracao();
+                  },
+                  icon: Icon(Icons.settings)),
+            ],
+          ),
+          floatingActionButton: Stack(
+            children: [
+              Positioned(
+                left: 250,
+                bottom: 0,
+                child: FloatingActionButton(
+                    onPressed: () {
+                      leitorFisico ? _saveLeitor() : scanBarcode();
+                      //_exibeCodBarra();
+                      //Navigator.of(context).pushNamed('/scan');
+                      //_exibeCodBarra();
+                    },
+                    child: leitorFisico
+                        ? Icon(Icons.save_sharp)
+                        : Icon(Icons.photo_camera_sharp)),
+              ),
+            ],
+          ),
+          body: Center(
+            child: Column(
+              children: [
+                Padding(
+                    padding: EdgeInsets.fromLTRB(8, 2, 8, 2),
+                    child: _leitorReal(context)),
+                Expanded(
+                  child: SizedBox(
+                    height: double.infinity,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(8),
+                      itemCount: codbarra.length,
+                      itemBuilder: (context, int index) {
+                        return _listaCodBarras(context, index);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )),
     );
   }
 
@@ -161,12 +196,64 @@ class _HistoricoState extends State<Historico> {
           ),
         ),
         onTap: () {
+          _focus.unfocus();
           if (qtdAgrupada == false) {
             _exibeCodBarra(codbarra: codbarra[index]);
           }
         });
   }
 
+  // TEXT FIELD DO LEITOR FISICO
+  _leitorReal(BuildContext context) {
+    _focus.requestFocus();
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+
+    return Visibility(
+      visible: leitorFisico,
+      child: TextFormField(
+        enableInteractiveSelection: true,
+        keyboardType: TextInputType.number,
+        inputFormatters: <TextInputFormatter>[
+          FilteringTextInputFormatter.digitsOnly
+        ],
+        autofocus: true,
+        maxLength: 14,
+        controller: msgController,
+        focusNode: _focus,
+        decoration: new InputDecoration(
+            border: InputBorder.none,
+            contentPadding:
+                EdgeInsets.only(left: 15, bottom: 11, top: 11, right: 15),
+            hintText: "Código",
+            counterText: ""),
+        enabled: true,
+        onChanged: (value) {
+          valorDigitado = value;
+        },
+        onFieldSubmitted: (value) {
+          if (value.length < 12) {
+            SystemChannels.textInput.invokeMethod('TextInput.hide');
+            _showCodigoInvalido(context);
+            msgController.clear();
+            _focus.requestFocus();
+          } else {
+            if (value.length == 12) {
+              value = '0' + value;
+            }
+            _editaCodBarra = codigo_barras(null, value, 1);
+            db.insertCodBarra(_editaCodBarra);
+            _exibeTodosCodBarra();
+            print(value);
+            msgController.clear();
+            SystemChannels.textInput.invokeMethod('TextInput.hide');
+            //_focus.requestFocus();
+          }
+        },
+      ),
+    );
+  }
+
+  //Void que leva para a edição do código de barras
   Future<void> _exibeCodBarra({codbarra}) async {
     // ignore: non_constant_identifier_names
     final CodBarraAlterado = await Navigator.push(
@@ -189,6 +276,7 @@ class _HistoricoState extends State<Historico> {
 
   //Dá um setState forçado para poder rodar
   Future<void> _alteracaoConfiguracao() async {
+    _focus.unfocus();
     final configuracaoAlterada = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -197,8 +285,10 @@ class _HistoricoState extends State<Historico> {
                 )));
     if (configuracaoAlterada != null) {
       SharedPrefs();
+      SharedPrefsLeitorReal();
     } else {
       SharedPrefs();
+      SharedPrefsLeitorReal();
     }
   }
 
@@ -330,6 +420,26 @@ class _HistoricoState extends State<Historico> {
         });
   }
 
+  void _showCodigoInvalido(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Código inválido, por favor tente novamente."),
+            content: Text("Tente digitar ou escanear o código novamente."),
+            actions: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _focus.requestFocus();
+                },
+                child: Text("Ok"),
+              )
+            ],
+          );
+        });
+  }
+
   void _showCaminhoExp(String x) {
     showDialog(
         context: context,
@@ -375,6 +485,29 @@ class _HistoricoState extends State<Historico> {
       });
     } on PlatformException {
       barcode = 'Um erro ocorreu, tente novamente';
+    }
+  }
+
+  //Void qye salva os dados do texto digitado no leitor pelo FloatButton
+  void _saveLeitor() {
+    if (valorDigitado.length < 12) {
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+      _showCodigoInvalido(context);
+      //msgController.clear();
+      _focus.requestFocus();
+    } else {
+      //Força o UPC a se tornar um EAN13
+      if (valorDigitado.length == 12) {
+        valorDigitado = '0' + valorDigitado;
+      }
+      _editaCodBarra = codigo_barras(null, valorDigitado, 1);
+      db.insertCodBarra(_editaCodBarra);
+      _exibeTodosCodBarra();
+      print(valorDigitado);
+      valorDigitado = "";
+      msgController.clear();
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+      _focus.requestFocus();
     }
   }
 
@@ -506,6 +639,21 @@ class _HistoricoState extends State<Historico> {
     }
     print(qtdAgrupada);
     print("Deveria passar aqui");
+    _exibeTodosCodBarra();
+  }
+
+  //Seta false para o leitor fisico na primeira vez que o app for aberto
+  Future<void> SharedPrefsLeitorReal() async {
+    final prefs = await SharedPreferences.getInstance();
+    final leitorReal = prefs.getBool("LeitorReal");
+    if (leitorReal == null) {
+      prefs.setBool("LeitorReal", false);
+      leitorFisico = prefs.getBool("LeitorReal");
+    } else {
+      leitorFisico = prefs.getBool("LeitorReal");
+    }
+    print(leitorFisico);
+    print("TO LOCO");
     _exibeTodosCodBarra();
   }
 

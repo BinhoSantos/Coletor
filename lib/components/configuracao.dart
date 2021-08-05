@@ -1,6 +1,7 @@
 import 'package:coletor_nativo/controller/agrupa_quantidade.dart';
 import 'package:coletor_nativo/controller/dark_mode.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Configuracao extends StatefulWidget {
@@ -13,12 +14,14 @@ class Configuracao extends StatefulWidget {
 class _ConfiguracaoState extends State<Configuracao> {
   var agrupaQtd = false;
   var qtdGroup;
-  var darkMode;
+  var leitorReal;
 
   @override
   void initState() {
     super.initState();
     getShared();
+    getSharedLeitor();
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
   }
 
   @override
@@ -90,6 +93,36 @@ class _ConfiguracaoState extends State<Configuracao> {
             ),
           ),
         ),
+        Card(
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        "Modo leitor físico",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      Container(
+                        height: 10,
+                      ),
+                      Text(
+                        "Habilita o uso do escaneador físico e \na inserção de dados manualmente ",
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+                _customSwitchLeitor(context, leitorReal),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -114,6 +147,7 @@ class _ConfiguracaoState extends State<Configuracao> {
         value: x, //Atribui value ao booleano da AgrupaQuantidade.dart
         onChanged: (bool s) {
           setState(() {
+            SystemChannels.textInput.invokeMethod('TextInput.hide');
             agrupaQtd = s;
             qtdGroup = s;
             print(agrupaQtd);
@@ -132,6 +166,18 @@ class _ConfiguracaoState extends State<Configuracao> {
         onChanged: (value) {
           //Quando o Switch for utilizado
           DarkMode.instance.changeTheme();
+          SystemChannels.textInput.invokeMethod('TextInput.hide');
+        });
+  }
+
+  _customSwitchLeitor(BuildContext context, bool x) {
+    return Switch(
+        value: x, //Atribui value ao booleano da AgrupaQuantidade.dart
+        onChanged: (bool s) {
+          setState(() {
+            _leitorReal(s);
+            getSharedLeitor();
+          });
         });
   }
 
@@ -149,8 +195,20 @@ class _ConfiguracaoState extends State<Configuracao> {
     setState(() {});
   }
 
+  Future<void> getSharedLeitor() async {
+    final prefs = await SharedPreferences.getInstance();
+    leitorReal = prefs.getBool("LeitorReal");
+    print(leitorReal);
+    setState(() {});
+  }
+
+  Future<void> _leitorReal(bool leitor) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool("LeitorReal", leitor);
+  }
+
   Future<bool> _onBackPressed() async {
-    if (qtdGroup != !qtdGroup) {
+    if (qtdGroup != !qtdGroup || leitorReal != !leitorReal) {
       Navigator.of(context).pop();
       print("VOLTA TA FUNCIONANDO");
     }

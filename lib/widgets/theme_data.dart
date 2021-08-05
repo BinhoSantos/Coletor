@@ -1,4 +1,3 @@
-import 'package:coletor_nativo/components/barcode_scanner_page.dart';
 import 'package:coletor_nativo/components/cadastro_codbarra.dart';
 import 'package:coletor_nativo/components/coletor_add_page.dart';
 import 'package:coletor_nativo/components/configuracao.dart';
@@ -10,9 +9,7 @@ import 'package:flutter/material.dart';
 
 //Classe responsável pelas rotas e pelo design do aplicativo
 class ThemeData2 extends StatelessWidget {
-  const ThemeData2(
-      {Key? key, required MyHomePage home, required BarcodeScanPage scan})
-      : super(key: key);
+  const ThemeData2({Key? key, required MyHomePage home}) : super(key: key);
   static final String title = 'Coletor';
 
   @override
@@ -30,9 +27,6 @@ class ThemeData2 extends StatelessWidget {
         routes: <String, WidgetBuilder>{
           '/t': (context) => LoginPage(),
           '/': (context) => MyHomePage(title: title),
-          '/scan': (context) => BarcodeScanPage(
-                title: title,
-              ),
           '/addcodbarra': (context) => Coletor_Add(),
           '/historico': (context) => Historico(),
           "/cad": (context) => CadastroCodigoBarra(),

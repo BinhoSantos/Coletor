@@ -1,4 +1,4 @@
-package com.brasilsoftware.coletor_nativo
+package com.brasilsoftware.coletor
 
 import io.flutter.embedding.android.FlutterActivity
 

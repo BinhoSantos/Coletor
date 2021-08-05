@@ -7,6 +7,8 @@ class ButtonWidget extends StatelessWidget {
   const ButtonWidget({
     required this.text,
     required this.onClicked,
+    //Void Callback é o responsável por dar a função do
+    //botão/widget que estiver sendo usada
     Key? key,
   }) : super(key: key);
 

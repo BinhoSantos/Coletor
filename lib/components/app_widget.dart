@@ -1,5 +1,3 @@
-import 'package:coletor_nativo/components/barcode_scanner_page.dart';
-
 import 'package:coletor_nativo/controller/dark_mode.dart';
 import 'package:coletor_nativo/widgets/theme_data.dart';
 
@@ -16,8 +14,8 @@ class MyApp extends StatelessWidget {
         animation: DarkMode.instance,
         builder: (context, child) {
           return ThemeData2(
-              home: MyHomePage(title: title),
-              scan: BarcodeScanPage(title: title));
+            home: MyHomePage(title: title),
+          );
         });
   }
 }

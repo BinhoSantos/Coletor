@@ -107,24 +107,16 @@ class _HistoricoState extends State<Historico> {
                   icon: Icon(Icons.settings)),
             ],
           ),
-          floatingActionButton: Stack(
-            children: [
-              Positioned(
-                left: 250,
-                bottom: 0,
-                child: FloatingActionButton(
-                    onPressed: () {
-                      leitorFisico ? _saveLeitor() : scanBarcode();
-                      //_exibeCodBarra();
-                      //Navigator.of(context).pushNamed('/scan');
-                      //_exibeCodBarra();
-                    },
-                    child: leitorFisico
-                        ? Icon(Icons.save_sharp)
-                        : Icon(Icons.photo_camera_sharp)),
-              ),
-            ],
-          ),
+          floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                leitorFisico ? _saveLeitor() : scanBarcode();
+                //_exibeCodBarra();
+                //Navigator.of(context).pushNamed('/scan');
+                //_exibeCodBarra();
+              },
+              child: leitorFisico
+                  ? Icon(Icons.save_sharp)
+                  : Icon(Icons.photo_camera_sharp)),
           body: Center(
             child: Column(
               children: [
@@ -156,8 +148,20 @@ class _HistoricoState extends State<Historico> {
           child: Padding(
             padding: EdgeInsets.all(8),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    if (qtdAgrupada == true) {
+                      _confirmaExclusao(
+                          context, 1, (codbarra[index].codigo!), index);
+                    } else {
+                      _confirmaExclusao(context, codbarra[index].id!,
+                          (codbarra[index].codigo!), index);
+                    }
+                  },
+                ),
                 Padding(
                   padding: EdgeInsets.all(8),
                   child: Column(
@@ -174,20 +178,6 @@ class _HistoricoState extends State<Historico> {
                       ),
                     ],
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    if (qtdAgrupada == true) {
-                      _confirmaExclusao(
-                          context, 1, (codbarra[index].codigo!), index);
-                    } else {
-                      _confirmaExclusao(context, codbarra[index].id!,
-                          (codbarra[index].codigo!), index);
-                    }
-                    //Inserir o if do qtdAgrupada aqui e fazer a separação
-                    //
-                  },
                 ),
               ],
             ),

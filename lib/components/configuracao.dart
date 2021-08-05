@@ -13,12 +13,13 @@ class Configuracao extends StatefulWidget {
 class _ConfiguracaoState extends State<Configuracao> {
   var agrupaQtd = false;
   var qtdGroup;
-  var darkMode;
+  var leitorReal;
 
   @override
   void initState() {
     super.initState();
     getShared();
+    getSharedLeitor();
   }
 
   @override
@@ -90,6 +91,36 @@ class _ConfiguracaoState extends State<Configuracao> {
             ),
           ),
         ),
+        Card(
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        "Modo leitor físico",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      Container(
+                        height: 10,
+                      ),
+                      Text(
+                        "Habilita o uso do leitor físico e \na inserção de dados manualmente",
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+                _customSwitchLeitor(context, leitorReal),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -133,6 +164,17 @@ class _ConfiguracaoState extends State<Configuracao> {
         });
   }
 
+  _customSwitchLeitor(BuildContext context, bool x) {
+    return Switch(
+        value: x, //Atribui value ao booleano da AgrupaQuantidade.dart
+        onChanged: (bool s) {
+          setState(() {
+            _leitorReal(s);
+            getSharedLeitor();
+          });
+        });
+  }
+
   Future<void> SharedPrefs(bool x) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setBool("QtdAgrupada", x);
@@ -145,6 +187,18 @@ class _ConfiguracaoState extends State<Configuracao> {
     final prefs = await SharedPreferences.getInstance();
     qtdGroup = prefs.getBool("QtdAgrupada");
     setState(() {});
+  }
+
+  Future<void> getSharedLeitor() async {
+    final prefs = await SharedPreferences.getInstance();
+    leitorReal = prefs.getBool("LeitorReal");
+    print(leitorReal);
+    setState(() {});
+  }
+
+  Future<void> _leitorReal(bool leitor) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool("LeitorReal", leitor);
   }
 
   Future<bool> _onBackPressed() async {

@@ -36,49 +36,59 @@ class _CadastroEditaState extends State<CadastroEdita> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_editaCodBarra.quantidade == 0
-            ? "Cadastro de Produto"
-            : "Editar Produto"),
-        centerTitle: true,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Conversor = int.parse(_editaQuantidadeProduto.text);
-          if (Conversor != null && Conversor > 0) {
-            _editaCodBarra.quantidade = Conversor;
-            Navigator.pop(context, _editaCodBarra);
-            /*Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        CadastroEdita(codbarra: _editaCodBarra)));*/
-          } else {
-            _exibeAviso();
-            FocusScope.of(context)
-                .requestFocus(_nomeFocus); //Leva o foco para o campo de nome
-          }
-        },
-        child: Icon(Icons.save),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            TextField(
-              controller: _editaCodigoProduto,
-              decoration: InputDecoration(labelText: "Código"),
-              enabled: false,
-            ),
-            TextField(
-              keyboardType: TextInputType.number,
-              controller: _editaQuantidadeProduto,
-              decoration: InputDecoration(labelText: "Quantidade"),
-              enabled: true,
-            ),
-          ],
+    return GestureDetector(
+      onTap: () {
+        FocusScopeNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus) {
+          currentFocus.unfocus();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_editaCodBarra.quantidade == 0
+              ? "Cadastro de Produto"
+              : "Editar Produto"),
+          centerTitle: true,
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            if (_editaQuantidadeProduto.text != "" &&
+                _editaQuantidadeProduto.text != "0") {
+              Conversor = int.parse(_editaQuantidadeProduto.text);
+              _editaCodBarra.quantidade = Conversor;
+              Navigator.pop(context, _editaCodBarra);
+              /*Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          CadastroEdita(codbarra: _editaCodBarra)));*/
+            } else {
+              _exibeAviso();
+              FocusScope.of(context)
+                  .requestFocus(_nomeFocus); //Leva o foco para o campo de nome
+            }
+          },
+          child: Icon(Icons.save),
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              TextField(
+                controller: _editaCodigoProduto,
+                decoration: InputDecoration(labelText: "Código"),
+                enabled: false,
+              ),
+              TextField(
+                focusNode: _nomeFocus,
+                keyboardType: TextInputType.number,
+                controller: _editaQuantidadeProduto,
+                decoration: InputDecoration(labelText: "Quantidade"),
+                enabled: true,
+              ),
+            ],
+          ),
         ),
       ),
     );

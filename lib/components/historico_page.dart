@@ -109,24 +109,16 @@ class _HistoricoState extends State<Historico> {
                   icon: Icon(Icons.settings)),
             ],
           ),
-          floatingActionButton: Stack(
-            children: [
-              Positioned(
-                left: 250,
-                bottom: 0,
-                child: FloatingActionButton(
-                    onPressed: () {
-                      leitorFisico ? _saveLeitor() : scanBarcode();
-                      //_exibeCodBarra();
-                      //Navigator.of(context).pushNamed('/scan');
-                      //_exibeCodBarra();
-                    },
-                    child: leitorFisico
-                        ? Icon(Icons.save_sharp)
-                        : Icon(Icons.photo_camera_sharp)),
-              ),
-            ],
-          ),
+          floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                leitorFisico ? _saveLeitor() : scanBarcode();
+                //_exibeCodBarra();
+                //Navigator.of(context).pushNamed('/scan');
+                //_exibeCodBarra();
+              },
+              child: leitorFisico
+                  ? Icon(Icons.save_sharp)
+                  : Icon(Icons.photo_camera_sharp)),
           body: Center(
             child: Column(
               children: [
